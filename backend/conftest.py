@@ -2,25 +2,18 @@ import pytest
 from backend.app import create_app, db
 import os
 from sqlalchemy.orm import sessionmaker
+from backend.app.test_config import TestConfig
 
 @pytest.fixture
 def app():
-    os.environ['DATABASE_URL'] = 'sqlite:////Users/CDN/Documents/SKIPPER/phpcode and current files/diagnostic-system/backend/test_db2_copy.db'
-    app = create_app()
-    app.config["TESTING"] = True
     
-
+    app = create_app(config_class=TestConfig)
+    
     with app.app_context():
 
-        
-
-        Session = sessionmaker(db.engine)
-
-        with db.engine.connect() as connection:
-            with Session(bind=connection) as session:
-                db.session.begin_nested()
-                yield app
-                db.session.rollback()
+        db.create_all()
+        yield app
+        db.drop_all()
 
 
 
