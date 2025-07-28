@@ -1,10 +1,7 @@
-import os
-from dotenv import load_dotenv
 
-load_dotenv("/Users/CDN/Documents/SKIPPER/phpcode and current files/diagnostic-system/backend/.env")
 
 class Config:
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
+    SQLALCHEMY_DATABASE_URI = "sqlite:////Users/CDN/Documents/SKIPPER/phpcode and current files/diagnostic-system/backend/diagn_sys_db.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     def __repr__(self):
