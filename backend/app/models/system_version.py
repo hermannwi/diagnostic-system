@@ -12,3 +12,6 @@ class SystemVersion(db.Model):
     to_supply_date  = db.Column(db.VARCHAR, nullable = False)
     from_sw  = db.Column(db.VARCHAR, nullable = False)
     to_sw  = db.Column(db.VARCHAR, nullable = False)
+
+    created_at = db.Column(db.DATETIME, nullable = False)
+    updated_at = db.Column(db.DATETIME, nullable = False)
