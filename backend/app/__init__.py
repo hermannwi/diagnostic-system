@@ -15,9 +15,19 @@ def create_app(config_class=Config):
     # Allow requests from http://localhost:3000 (React dev server)
     CORS(app)
 
-    migrate = Migrate(app, db)
     
+
     db.init_app(app)
+    migrate = Migrate(app, db)
+
+
+    from backend.app.models.diagnostics_8d import Diagnostics8d
+    from backend.app.models.product import Product
+    from backend.app.models.question import Question
+    from backend.app.models.root_cause_question import RootCauseQuestion
+    from backend.app.models.root_cause import RootCause
+    from backend.app.models.system_version import SystemVersion
+    
 
     # from app.admin.routes import admin_bp
     # app.register_blueprint(admin_bp, url_prefix="/admin")
