@@ -1,10 +1,11 @@
 from backend.app import db
-from flask import Blueprint, jsonify
+from datetime import datetime
+from flask import Blueprint, jsonify, request
 from backend.app.models.diagnostics_8d import Diagnostics8d
 from backend.app.models.product import Product
 from backend.app.models.question import Question
 from backend.app.models.root_cause import RootCause
-from backend.app.models.system_version import SystemVersion
+
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -57,10 +58,57 @@ def get_one_8d(id):
     
 
 
+
+
+
 @admin_bp.route('/diagnostics8ds', methods=['POST'])
 def add_8d():
-    new_diagnostc_8d = Diagnostics8d()
-    return None
+    data = request.json()
+    
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    required_fields = ['product','issue']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    product_id = Product.query.get(data['product']).id
+    root_cause_id = RootCause.query.get(data.get('root_cause'))
+    
+    try:
+        new_diagnostic8d = Diagnostics8d(
+            product_id=product_id,
+            from_sn=data.get('from_sn'), 
+            to_sn=data.get('to_sn'),
+            from_version=data.get('from_version'),
+            to_version=data.get('to_version'),
+            from_supply_date=data.get('from_supply_date'),
+            to_supply_date=data.get('to_supply_date'),
+            from_sw=data.get('from_sw'),
+            to_sw=data.get('to_sw'),
+            issue=data['issue'],
+            temporary_fix=data.get('temporary_fix'),
+            root_cause_id=root_cause_id,
+            corrective_action=data.get('corrective_action'),
+            preventative_action=data.get('preventative_action'),
+            verified_fix=data.get('verified_fix'),
+            closed=data.get('closed'),
+            link8d=data.get('link8d'),
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+
+
+            
+        )
+        return new_diagnostic8d
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Database error occurred'}), 500
+
+
+
+
+
 
 @admin_bp.route('/diagnostics8d/<int:id>', methods=['DELETE'])
 def delete_8d(id):

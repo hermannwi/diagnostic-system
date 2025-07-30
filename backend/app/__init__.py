@@ -26,7 +26,7 @@ def create_app(config_class=Config):
     from backend.app.models.question import Question
     from backend.app.models.root_cause_question import RootCauseQuestion
     from backend.app.models.root_cause import RootCause
-    from backend.app.models.system_version import SystemVersion
+    
     
 
     # from app.admin.routes import admin_bp
