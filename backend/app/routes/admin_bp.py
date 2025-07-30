@@ -18,10 +18,17 @@ def get_all_8ds():
     return jsonify([
         {'id': d.id, 
          'product_id': d.product_id, 
-         'system_version_id': d.system_version_id,
+         'from_sn': d.from_sn,  
+         'to_sn': d.to_sn,
+         'from_version': d.from_version,
+         'to_version': d.to_version,
+         'from_supply_date': d.from_supply_date,
+         'to_supply_date': d.to_supply_date,
+         'from_sw': d.from_sw,
+         'to_sw': d.to_sw,
          'issue': d.issue,
          'temporary_fix': d.temporary_fix,
-         'root_cause': d.root_cause,
+         'root_cause_id': d.root_cause_id,
          'corrective_action': d.corrective_action,
          'preventative_action': d.preventative_action,
          'verified_fix': d.verified_fix,
@@ -42,10 +49,17 @@ def get_one_8d(id):
         return jsonify(
         {'id': diagnostic_8d.id, 
          'product_id': diagnostic_8d.product_id, 
-         'system_version_id': diagnostic_8d.system_version_id,
+         'from_sn': diagnostic_8d.from_sn,  
+         'to_sn': diagnostic_8d.to_sn,
+         'from_version': diagnostic_8d.from_version,
+         'to_version': diagnostic_8d.to_version,
+         'from_supply_date': diagnostic_8d.from_supply_date,
+         'to_supply_date': diagnostic_8d.to_supply_date,
+         'from_sw': diagnostic_8d.from_sw,
+         'to_sw': diagnostic_8d.to_sv,
          'issue': diagnostic_8d.issue,
          'temporary_fix': diagnostic_8d.temporary_fix,
-         'root_cause': diagnostic_8d.root_cause,
+         'root_cause_id': diagnostic_8d.root_cause_id,
          'corrective_action': diagnostic_8d.corrective_action,
          'preventative_action': diagnostic_8d.preventative_action,
          'verified_fix': diagnostic_8d.verified_fix,
@@ -84,6 +98,7 @@ def add_8d():
             root_cause_id = root_cause.id
     
     try:
+
         new_diagnostic8d = Diagnostics8d(
             product_id=product_id,
             from_sn=data.get('from_sn'), 
@@ -141,8 +156,57 @@ def delete_8d(id):
 
 @admin_bp.route('/diagnostics8ds/<int:id>', methods=['PUT'])
 def modify_8d(id):
-    #TODO
-    return None
+    data = request.json
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    
+    required_fields = ['product','issue']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    product = db.session.get(Product, data['product'])
+    if not product:
+        return jsonify({'error': 'Invalid product ID'}), 400
+    product_id = product.id
+
+    root_cause_id = None
+    if data.get('root_cause'):
+        root_cause = db.session.get(RootCause, data['root_cause'])
+        if root_cause:
+            root_cause_id = root_cause.id
+    
+    try:
+        retrieved_8d = db.session.get(Diagnostics8d, id)
+        if retrieved_8d == None:
+            return jsonify({'error': 'data not found'}), 404
+        else:
+            retrieved_8d = db.session.get(Diagnostics8d, id)
+            retrieved_8d.product_id=product_id
+            retrieved_8d.from_sn=data.get('from_sn') 
+            retrieved_8d.to_sn=data.get('to_sn')
+            retrieved_8d.from_version=data.get('from_version')
+            retrieved_8d.to_version=data.get('to_version')
+            retrieved_8d.from_supply_date=data.get('from_supply_date')
+            retrieved_8d.to_supply_date=data.get('to_supply_date')
+            retrieved_8d.from_sw=data.get('from_sw')
+            retrieved_8d.to_sw=data.get('to_sw')
+            retrieved_8d.issue=data['issue']
+            retrieved_8d.temporary_fix=data.get('temporary_fix')
+            retrieved_8d.root_cause_id=root_cause_id
+            retrieved_8d.corrective_action=data.get('corrective_action')
+            retrieved_8d.preventative_action=data.get('preventative_action')
+            retrieved_8d.verified_fix=data.get('verified_fix')
+            retrieved_8d.closed=data.get('closed')
+            retrieved_8d.link_8d=data.get('link_8d')
+            retrieved_8d.created_at=retrieved_8d.created_at
+            retrieved_8d.updated_at=datetime.now()
+
+            db.session.commit()
+            return jsonify({'message': '8D Diagnostic updated', 'id': id}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Database error occurred'}), 500 
 
 # endregion
 
