@@ -47,7 +47,33 @@ def get_one_8d(id):
         return jsonify({'error', 'resource not found'}), 404
     else:
         return jsonify(
-        {'id': diagnostic_8d.id, 
+            dict_8d(diagnostic_8d))
+        # {'id': diagnostic_8d.id, 
+        #  'product_id': diagnostic_8d.product_id, 
+        #  'from_sn': diagnostic_8d.from_sn,  
+        #  'to_sn': diagnostic_8d.to_sn,
+        #  'from_version': diagnostic_8d.from_version,
+        #  'to_version': diagnostic_8d.to_version,
+        #  'from_supply_date': diagnostic_8d.from_supply_date,
+        #  'to_supply_date': diagnostic_8d.to_supply_date,
+        #  'from_sw': diagnostic_8d.from_sw,
+        #  'to_sw': diagnostic_8d.to_sv,
+        #  'issue': diagnostic_8d.issue,
+        #  'temporary_fix': diagnostic_8d.temporary_fix,
+        #  'root_cause_id': diagnostic_8d.root_cause_id,
+        #  'corrective_action': diagnostic_8d.corrective_action,
+        #  'preventative_action': diagnostic_8d.preventative_action,
+        #  'verified_fix': diagnostic_8d.verified_fix,
+        #  'closed': diagnostic_8d.closed,
+        #  'link_8d': diagnostic_8d.link_8d,
+        #  'created_at': diagnostic_8d.created_at,
+        #  'updated_at': diagnostic_8d.updated_at
+
+        #  })
+    
+
+def dict_8d(diagnostic_8d):
+        return {'id': diagnostic_8d.id, 
          'product_id': diagnostic_8d.product_id, 
          'from_sn': diagnostic_8d.from_sn,  
          'to_sn': diagnostic_8d.to_sn,
@@ -56,7 +82,7 @@ def get_one_8d(id):
          'from_supply_date': diagnostic_8d.from_supply_date,
          'to_supply_date': diagnostic_8d.to_supply_date,
          'from_sw': diagnostic_8d.from_sw,
-         'to_sw': diagnostic_8d.to_sv,
+         'to_sw': diagnostic_8d.to_sw,
          'issue': diagnostic_8d.issue,
          'temporary_fix': diagnostic_8d.temporary_fix,
          'root_cause_id': diagnostic_8d.root_cause_id,
@@ -68,10 +94,7 @@ def get_one_8d(id):
          'created_at': diagnostic_8d.created_at,
          'updated_at': diagnostic_8d.updated_at
 
-         })
-    
-
-
+         }
 
 
 
@@ -166,7 +189,7 @@ def modify_8d(id):
     
     product = db.session.get(Product, data['product'])
     if not product:
-        return jsonify({'error': 'Invalid product ID'}), 400
+        return jsonify({'error': 'Invalid product'}), 400
     product_id = product.id
 
     root_cause_id = None
@@ -180,7 +203,6 @@ def modify_8d(id):
         if retrieved_8d == None:
             return jsonify({'error': 'data not found'}), 404
         else:
-            retrieved_8d = db.session.get(Diagnostics8d, id)
             retrieved_8d.product_id=product_id
             retrieved_8d.from_sn=data.get('from_sn') 
             retrieved_8d.to_sn=data.get('to_sn')
@@ -202,10 +224,11 @@ def modify_8d(id):
             retrieved_8d.updated_at=datetime.now()
 
             db.session.commit()
-            return jsonify({'message': '8D Diagnostic updated', 'id': id}), 200
+            return jsonify({'message': '8D Diagnostic updated', 'id': id, 'object': dict_8d(retrieved_8d)}), 200
 
     except Exception as e:
         db.session.rollback()
+        print(f"Debug - Actual error: {e}")
         return jsonify({'error': f'Database error occurred'}), 500 
 
 # endregion

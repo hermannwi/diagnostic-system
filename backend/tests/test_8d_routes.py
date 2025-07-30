@@ -57,8 +57,6 @@ def test_delete_record_existing_record(client):
     assert  Diagnostics8d.query.count() == 0
 
     d_8d = create_8d()
-    db.session.add(d_8d)
-    db.session.commit()
 
     assert  Diagnostics8d.query.count() == 1
 
@@ -79,6 +77,18 @@ def test_delete_nonexistent_record(client):
 
 # test modify
 
+def test_modify(client):
+    d_8d = create_8d()
+    payload = {
+        "product": 1,
+        'issue': 'modified issue'
+    }
+    response = client.put(f"/admin/diagnostics8ds/{d_8d.id}", json=payload)
+    print(f'response {response.get_json()}')
+
+    assert  response.get_json()['object']['issue'] == 'modified issue'
+
+
 ###
 
 
@@ -87,4 +97,7 @@ def create_8d():
     db.session.add(product)
     db.session.commit()
     d_8d = Diagnostics8d(product_id=product.id, issue='some issue', created_at=datetime.now(), updated_at=datetime.now())
+    db.session.add(d_8d)
+    db.session.commit()
     return d_8d
+    
