@@ -26,10 +26,11 @@ def create_app(config_class=Config):
     from backend.app.models.question import Question
     from backend.app.models.root_cause_question import RootCauseQuestion
     from backend.app.models.root_cause import RootCause
-    
-    
 
-    # from app.admin.routes import admin_bp
-    # app.register_blueprint(admin_bp, url_prefix="/admin")
+    from backend.app.routes.admin_bp import admin_bp
+    
+    app.register_blueprint(admin_bp)
+
+    
 
     return app

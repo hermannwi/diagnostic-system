@@ -72,8 +72,14 @@ def add_8d():
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Missing required fields'}), 400
     
-    product_id = Product.query.get(data['product']).id
-    root_cause_id = RootCause.query.get(data.get('root_cause'))
+    product = Product.query.get(data['product'])
+    if not product:
+        return jsonify({'error': 'Invalid product ID'}), 400
+    product_id = product.id
+
+
+    root_cause = RootCause.query.get(data.get('root_cause'))
+    root_cause_id = root_cause.id if root_cause else None   
     
     try:
         new_diagnostic8d = Diagnostics8d(
@@ -100,7 +106,10 @@ def add_8d():
 
             
         )
-        return new_diagnostic8d
+        db.session.add(new_diagnostic8d)
+        db.session.commit()
+        return jsonify({'message': '8D Diagnostic created', 'id': new_diagnostic8d.id}), 201
+
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'Database error occurred'}), 500
@@ -160,7 +169,7 @@ def modify_product(id):
 # region Routes for the question table
 
 @admin_bp.route('/questions', methods=['GET'])
-def get_all_products():
+def get_all_questions():
     questions = Question.query.all()
     return jsonify([{'id': q.id, 
                      'questions': q.question, 
@@ -244,53 +253,53 @@ def modify_root_cause(id):
 
 # region Routes for system versions
 
-@admin_bp.route('/system-versions', methods=['GET'])
-def get_all_system_versions():
-    system_versions = RootCause.query.all()
-    return jsonify([{'id': sv.id, 
-                     'from_sn': sv.from_sn,  
-                     'to_sn': sv.to_sn,
-                     'from_version': sv.from_version,
-                     'to_version': sv.to_version,
-                     'from_supply_date': sv.from_supply_date,
-                     'to_supply_date': sv.to_supply_date,
-                     'from_sw': sv.from_sw,
-                     'to_sw': sv.to_sv,
-                     "created_at": sv.created_at, 
-                     "updated_at": sv.updated_at} for sv in system_versions]) 
+# @admin_bp.route('/system-versions', methods=['GET'])
+# def get_all_system_versions():
+#     system_versions = RootCause.query.all()
+#     return jsonify([{'id': sv.id, 
+#                      'from_sn': sv.from_sn,  
+#                      'to_sn': sv.to_sn,
+#                      'from_version': sv.from_version,
+#                      'to_version': sv.to_version,
+#                      'from_supply_date': sv.from_supply_date,
+#                      'to_supply_date': sv.to_supply_date,
+#                      'from_sw': sv.from_sw,
+#                      'to_sw': sv.to_sv,
+#                      "created_at": sv.created_at, 
+#                      "updated_at": sv.updated_at} for sv in system_versions]) 
 
-@admin_bp.route('/system-versions/<int:id>', methods=['GET'])
-def get_one_system_versions(id):
-    system_version = SystemVersion.query.get(id)
-    if system_version == None:
-        return jsonify({'error': 'Resource not found'}), 404
-    else:
-        return jsonify({'id': system_version.id, 
-                        'from_sn': system_version.from_sn,  
-                        'to_sn': system_version.to_sn,
-                        'from_version': system_version.from_version,
-                        'to_version': system_version.to_version,
-                        'from_supply_date': system_version.from_supply_date,
-                        'to_supply_date': system_version.to_supply_date,
-                        'from_sw': system_version.from_sw,
-                        'to_sw': system_version.to_sv,
-                        "created_at": system_version.created_at, 
-                        "updated_at": system_version.updated_at})
+# @admin_bp.route('/system-versions/<int:id>', methods=['GET'])
+# def get_one_system_versions(id):
+#     system_version = SystemVersion.query.get(id)
+#     if system_version == None:
+#         return jsonify({'error': 'Resource not found'}), 404
+#     else:
+#         return jsonify({'id': system_version.id, 
+#                         'from_sn': system_version.from_sn,  
+#                         'to_sn': system_version.to_sn,
+#                         'from_version': system_version.from_version,
+#                         'to_version': system_version.to_version,
+#                         'from_supply_date': system_version.from_supply_date,
+#                         'to_supply_date': system_version.to_supply_date,
+#                         'from_sw': system_version.from_sw,
+#                         'to_sw': system_version.to_sv,
+#                         "created_at": system_version.created_at, 
+#                         "updated_at": system_version.updated_at})
 
 
-@admin_bp.route('/system-versions/<int:id>', methods=['POST'])
-def add_system_versions(id):
-    #TODO
-    return None
+# @admin_bp.route('/system-versions/<int:id>', methods=['POST'])
+# def add_system_versions(id):
+#     #TODO
+#     return None
 
-@admin_bp.route('/system-versions/<int:id>', methods=['DELETE'])
-def delete_system_versions(id):
-    #TODO
-    return None
+# @admin_bp.route('/system-versions/<int:id>', methods=['DELETE'])
+# def delete_system_versions(id):
+#     #TODO
+#     return None
 
-@admin_bp.route('/system-versions/<int:id>', methods=['PUT'])
-def modify_system_versions(id):
-    #TODO
-    return None
+# @admin_bp.route('/system-versions/<int:id>', methods=['PUT'])
+# def modify_system_versions(id):
+#     #TODO
+#     return None
 
 # endregion
