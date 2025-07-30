@@ -23,6 +23,6 @@ def test_insert_one(app):
         print(f"first record id = {first_record.id}")
 
 def insert_one():
-    new_record = Diagnostics8d(product_id=1, system_version_id=1, issue="some issue", created_at=datetime.now(), updated_at=datetime.now())
+    new_record = Diagnostics8d(product_id=1, issue="some issue", created_at=datetime.now(), updated_at=datetime.now())
     db.session.add(new_record)
     db.session.flush()

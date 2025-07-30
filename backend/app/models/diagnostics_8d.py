@@ -6,7 +6,6 @@ class Diagnostics8d(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, nullable=False)
-    system_version_id  = db.Column(db.Integer, nullable=False)
     from_sn = db.Column(db.VARCHAR, nullable = True) 
     to_sn  = db.Column(db.VARCHAR, nullable = True)
     from_version  = db.Column(db.VARCHAR, nullable = True)

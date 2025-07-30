@@ -63,7 +63,7 @@ def get_one_8d(id):
 
 @admin_bp.route('/diagnostics8ds', methods=['POST'])
 def add_8d():
-    data = request.json()
+    data = request.json
     
     if not data:
         return jsonify({'error': 'No data provided'}), 400
@@ -72,14 +72,16 @@ def add_8d():
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Missing required fields'}), 400
     
-    product = Product.query.get(data['product'])
+    product = db.session.get(Product, data['product'])
     if not product:
         return jsonify({'error': 'Invalid product ID'}), 400
     product_id = product.id
 
-
-    root_cause = RootCause.query.get(data.get('root_cause'))
-    root_cause_id = root_cause.id if root_cause else None   
+    root_cause_id = None
+    if data.get('root_cause'):
+        root_cause = db.session.get(RootCause, data['root_cause'])
+        if root_cause:
+            root_cause_id = root_cause.id
     
     try:
         new_diagnostic8d = Diagnostics8d(
@@ -99,7 +101,7 @@ def add_8d():
             preventative_action=data.get('preventative_action'),
             verified_fix=data.get('verified_fix'),
             closed=data.get('closed'),
-            link8d=data.get('link8d'),
+            link_8d=data.get('link_8d'),
             created_at=datetime.now(),
             updated_at=datetime.now()
 
@@ -111,20 +113,33 @@ def add_8d():
         return jsonify({'message': '8D Diagnostic created', 'id': new_diagnostic8d.id}), 201
 
     except Exception as e:
+        
+        
         db.session.rollback()
-        return jsonify({'error': 'Database error occurred'}), 500
+        return jsonify({'error': f'Database error occurred'}), 500
 
 
 
 
 
 
-@admin_bp.route('/diagnostics8d/<int:id>', methods=['DELETE'])
+@admin_bp.route('/diagnostics8ds/<int:id>', methods=['DELETE'])
 def delete_8d(id):
-    #TODO
-    return None
+    try:
+        deleted_count = Diagnostics8d.query.filter_by(id=id).delete()
+        if deleted_count == 0:
+            return jsonify({'error': f'No records with id {id}'}), 404
+        else:
+            db.session.commit()
+            return jsonify({'message': 'Record deleted successfully'}), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Database error occurred'}), 500
 
-@admin_bp.route('/diagnostics8d/<int:id>', methods=['PUT'])
+
+
+@admin_bp.route('/diagnostics8ds/<int:id>', methods=['PUT'])
 def modify_8d(id):
     #TODO
     return None
