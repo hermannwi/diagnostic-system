@@ -168,7 +168,7 @@ def get_all_root_causes():
 def get_one_root_cause(id):
     root_cause = RootCause.query.get(id)
     if root_cause == None:
-        return 
+        return jsonify({'error': 'resource not found'}, 404)
 
     else:
         return jsonify({'id': root_cause.id, 
@@ -192,9 +192,9 @@ def modify_root_cause(id):
     #TODO
     return None
 
+# endregion
 
-
-# Routes for system versions
+# region Routes for system versions
 
 @admin_bp.route('/system-versions', methods=['GET'])
 def get_all_system_versions():
@@ -244,3 +244,5 @@ def delete_system_versions(id):
 def modify_system_versions(id):
     #TODO
     return None
+
+# endregion

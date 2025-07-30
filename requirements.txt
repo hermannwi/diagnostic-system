@@ -14,6 +14,6 @@ packaging==25.0
 pluggy==1.6.0
 Pygments==2.19.2
 pytest==8.4.1
-SQLAlchemy==2.0.41
+SQLAlchemy==2.0.42
 typing_extensions==4.14.1
 Werkzeug==3.1.3
