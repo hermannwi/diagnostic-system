@@ -298,8 +298,15 @@ def modify_product(id):
             return jsonify({'error': 'data not found'}), 404
         else:
             product_to_be_modified.product = data['product']
-            product_to_be_modified.created_at = product_to_be_modified.created_at
             product_to_be_modified.updated_at = datetime.now()
+
+            db.session.commit()
+            return jsonify({
+                'id': product_to_be_modified.id,
+                'product': product_to_be_modified.product,
+                'created_at': product_to_be_modified.created_at,
+                'updated_at': product_to_be_modified.updated_at
+            }), 200
     except Exception as e:
         db.session.rollback()
         print(f"Debug - Actual error: {e}")
@@ -307,60 +314,6 @@ def modify_product(id):
     
     
 
-
-# @admin_bp.route('/diagnostics8ds/<int:id>', methods=['PUT'])
-# def modify_8d(id):
-#     data = request.json
-#     if not data:
-#         return jsonify({'error': 'No data provided'}), 400
-    
-#     required_fields = ['product','issue']
-#     if not all(field in data for field in required_fields):
-#         return jsonify({'error': 'Missing required fields'}), 400
-    
-#     product = db.session.get(Product, data['product'])
-#     if not product:
-#         return jsonify({'error': 'Invalid product'}), 400
-#     product_id = product.id
-
-#     root_cause_id = None
-#     if data.get('root_cause'):
-#         root_cause = db.session.get(RootCause, data['root_cause'])
-#         if root_cause:
-#             root_cause_id = root_cause.id
-    
-#     try:
-#         retrieved_8d = db.session.get(Diagnostics8d, id)
-#         if retrieved_8d == None:
-#             return jsonify({'error': 'data not found'}), 404
-#         else:
-#             retrieved_8d.product_id=product_id
-#             retrieved_8d.from_sn=data.get('from_sn') 
-#             retrieved_8d.to_sn=data.get('to_sn')
-#             retrieved_8d.from_version=data.get('from_version')
-#             retrieved_8d.to_version=data.get('to_version')
-#             retrieved_8d.from_supply_date=data.get('from_supply_date')
-#             retrieved_8d.to_supply_date=data.get('to_supply_date')
-#             retrieved_8d.from_sw=data.get('from_sw')
-#             retrieved_8d.to_sw=data.get('to_sw')
-#             retrieved_8d.issue=data['issue']
-#             retrieved_8d.temporary_fix=data.get('temporary_fix')
-#             retrieved_8d.root_cause_id=root_cause_id
-#             retrieved_8d.corrective_action=data.get('corrective_action')
-#             retrieved_8d.preventative_action=data.get('preventative_action')
-#             retrieved_8d.verified_fix=data.get('verified_fix')
-#             retrieved_8d.closed=data.get('closed')
-#             retrieved_8d.link_8d=data.get('link_8d')
-#             retrieved_8d.created_at=retrieved_8d.created_at
-#             retrieved_8d.updated_at=datetime.now()
-
-#             db.session.commit()
-#             return jsonify({'message': '8D Diagnostic updated', 'id': id, 'object': dict_8d(retrieved_8d)}), 200
-
-#     except Exception as e:
-#         db.session.rollback()
-#         print(f"Debug - Actual error: {e}")
-#         return jsonify({'error': f'Database error occurred'}), 500 
 
 # endregion
 
@@ -394,18 +347,94 @@ def get_one_question(id):
 
 @admin_bp.route('/questions', methods=['POST'])
 def add_question():
-    #TODO
-    return None
+    data = request.json
+
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+   
+
+    required_fields = ['question']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    try:
+        new_question = Question(
+            question=data['question'],
+            description=data.get('description'),
+            help_text_link=data.get('help_text_link'),
+            help_image_link=data.get('help_image_link'),
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        db.session.add(new_question)
+        db.session.commit()
+        return jsonify({
+            'id': new_question.id,
+            'question': new_question.question,
+            'description': new_question.description,
+            'help_text_link': new_question.help_text_link,
+            'help_image_link': new_question.help_image_link,
+            'created_at': new_question.created_at,
+            'updated_at': new_question.updated_at
+        }), 201
+
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Database error occurred'}), 500
+
 
 @admin_bp.route('/questions/<int:id>', methods=['DELETE'])
 def delete_question(id):
-    #TODO
-    return None
+    try:
+        deleted_count = Question.query.delete.filter_by(id=id).delete()
+        if deleted_count == 0:
+            return jsonify({'error': f'No records with id {id}'}), 404
+        else:
+            db.session.commit()
+            return jsonify({'message': 'Record deleted successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Database error occurred'}), 500
+
 
 @admin_bp.route('/questions/<int:id>', methods=['PUT'])
 def modify_question(id):
-    #TODO
-    return None
+    data = request.json
+    if not data: 
+        return jsonify({'error': 'No data provided'}), 400
+    
+    required_fields = ['question']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    try:
+        question_to_be_modified = db.session.get(Question, id)
+        if question_to_be_modified == None:
+            return jsonify({'error': 'data not found'}), 404
+        else:
+            question_to_be_modified.question=data['question']
+            question_to_be_modified.description=data.get('description')
+            question_to_be_modified.help_text_link=data.get('help_text_link')
+            question_to_be_modified.help_image_link=data.get('help_image_link')
+            question_to_be_modified.updated_at=datetime.now()
+
+            db.session.commit()
+            return jsonify({
+                'id': question_to_be_modified.id,
+                'question': question_to_be_modified.question,
+                'description': question_to_be_modified.description,
+                'help_text_link': question_to_be_modified.help_text_link,
+                'help_image_link': question_to_be_modified.help_image_link,
+                'created_at':question_to_be_modified.created_at,
+                'updated_at': question_to_be_modified.updated_at
+            }), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Debug - Actual error: {e}")
+        return jsonify({'error': f'Database error occurred'}), 500 
+
+
 
 # endregion
 
@@ -423,7 +452,7 @@ def get_all_root_causes():
 def get_one_root_cause(id):
     root_cause = RootCause.query.get(id)
     if root_cause == None:
-        return jsonify({'error': 'resource not found'}, 404)
+        return jsonify({'error': 'resource not found'}), 404
 
     else:
         return jsonify({'id': root_cause.id, 
@@ -432,72 +461,84 @@ def get_one_root_cause(id):
                      "updated_at": root_cause.updated_at})
 
 
-@admin_bp.route('/root-causes/<int:id>', methods=['POST'])
-def add_root_cause(id):
-    #TODO
-    return None
+@admin_bp.route('/root-causes', methods=['POST'])
+def add_root_cause():
+    data = request.json
+
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+   
+
+    required_fields = ['root_cause']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    try:
+        new_root_cause = RootCause(
+            root_cause = data['root_cause'],
+            created_at = datetime.now(),
+            updated_at = datetime.now()
+        )
+        db.session.add(new_root_cause)
+        db.session.commit()
+        return jsonify({
+            'id': new_root_cause.id,
+            'root_cause': new_root_cause.root_cause,
+            'created_at': new_root_cause.created_at,
+            'updated_at': new_root_cause.updated_at
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Database error occurred'}), 500
 
 @admin_bp.route('/root-causes/<int:id>', methods=['DELETE'])
 def delete_root_cause(id):
-    #TODO
-    return None
+    try:
+        deleted_count = Product.query.filter_by(id=id).delete()
+        if deleted_count == 0:
+            return jsonify({'error': f'No records with id {id}'}), 404
+        else:
+            db.session.commit()
+            return jsonify({'message': 'Record deleted successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Database error occurred'}), 500
+    
 
 @admin_bp.route('/root-causes/<int:id>', methods=['PUT'])
 def modify_root_cause(id):
-    #TODO
-    return None
+    data = request.json
+
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+   
+
+    required_fields = ['root_cause']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    try:
+        root_cause_to_be_modified = db.session.get(RootCause, id)
+        if root_cause_to_be_modified == None:
+            return jsonify({'error': 'data not found'}), 404
+        else:
+            root_cause_to_be_modified.root_cause = data['root_cause']
+            root_cause_to_be_modified.updated_at = datetime.now()
+
+            db.session.commit()
+            return jsonify({
+                'id': root_cause_to_be_modified.id,
+                'root_cause': root_cause_to_be_modified.root_cause,
+                'created_at': root_cause_to_be_modified.created_at,
+                'updated_at': root_cause_to_be_modified.updated_at
+            })
+    except Exception as e:
+        db.session.rollback()
+        print(f"Debug - Actual error: {e}")
+        return jsonify({'error': f'Database error occurred'}), 500 
 
 # endregion
 
-# region Routes for system versions
-
-# @admin_bp.route('/system-versions', methods=['GET'])
-# def get_all_system_versions():
-#     system_versions = RootCause.query.all()
-#     return jsonify([{'id': sv.id, 
-#                      'from_sn': sv.from_sn,  
-#                      'to_sn': sv.to_sn,
-#                      'from_version': sv.from_version,
-#                      'to_version': sv.to_version,
-#                      'from_supply_date': sv.from_supply_date,
-#                      'to_supply_date': sv.to_supply_date,
-#                      'from_sw': sv.from_sw,
-#                      'to_sw': sv.to_sv,
-#                      "created_at": sv.created_at, 
-#                      "updated_at": sv.updated_at} for sv in system_versions]) 
-
-# @admin_bp.route('/system-versions/<int:id>', methods=['GET'])
-# def get_one_system_versions(id):
-#     system_version = SystemVersion.query.get(id)
-#     if system_version == None:
-#         return jsonify({'error': 'Resource not found'}), 404
-#     else:
-#         return jsonify({'id': system_version.id, 
-#                         'from_sn': system_version.from_sn,  
-#                         'to_sn': system_version.to_sn,
-#                         'from_version': system_version.from_version,
-#                         'to_version': system_version.to_version,
-#                         'from_supply_date': system_version.from_supply_date,
-#                         'to_supply_date': system_version.to_supply_date,
-#                         'from_sw': system_version.from_sw,
-#                         'to_sw': system_version.to_sv,
-#                         "created_at": system_version.created_at, 
-#                         "updated_at": system_version.updated_at})
 
 
-# @admin_bp.route('/system-versions/<int:id>', methods=['POST'])
-# def add_system_versions(id):
-#     #TODO
-#     return None
-
-# @admin_bp.route('/system-versions/<int:id>', methods=['DELETE'])
-# def delete_system_versions(id):
-#     #TODO
-#     return None
-
-# @admin_bp.route('/system-versions/<int:id>', methods=['PUT'])
-# def modify_system_versions(id):
-#     #TODO
-#     return None
-
-# endregion
