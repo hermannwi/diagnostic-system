@@ -33,4 +33,4 @@ class Diagnostics8d(db.Model):
     root_cause = db.relationship('RootCause', backref='diagnostic8ds', lazy='select')
 
     def __repr__(self):
-        print(f"<Diagnostic {self.id}>")
+        return f"<Diagnostic {self.id}>"

@@ -9,4 +9,4 @@ class RootCause(db.Model):
     updated_at = db.Column(db.DateTime, nullable=False)
 
     def __repr__(self):
-        print(f"<RootCause {self.id}>")
+        return f"<RootCause {self.id}>"

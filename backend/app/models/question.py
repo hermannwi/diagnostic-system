@@ -12,5 +12,5 @@ class Question(db.Model):
     updated_at = db.Column(db.DateTime, nullable=False)
 
     def __repr__(self):
-        print(f"<Question {self.id}>")
+        return f"<Question {self.id}>"
 

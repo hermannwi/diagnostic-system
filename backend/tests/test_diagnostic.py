@@ -1,4 +1,5 @@
 from backend.app.models.diagnostics_8d import Diagnostics8d
+from backend.app.models.product import Product
 from backend.app import db
 from datetime import datetime
 
@@ -26,3 +27,17 @@ def insert_one():
     new_record = Diagnostics8d(product_id=1, issue="some issue", created_at=datetime.now(), updated_at=datetime.now())
     db.session.add(new_record)
     db.session.flush()
+
+
+def test_backref(client):
+    product1 = Product(product='EML200', created_at=datetime.now(), updated_at=datetime.now())
+    db.session.add(product1)
+    db.session.commit()
+
+    d_8d1 = Diagnostics8d(product_id=product1.id, issue='some issue', created_at=datetime.now(), updated_at=datetime.now())
+    d_8d2 = Diagnostics8d(product_id=product1.id, issue='some other issue', created_at=datetime.now(), updated_at=datetime.now())
+    db.session.add(d_8d1)
+    db.session.add(d_8d2)
+    db.session.commit()
+
+    print(db.session.get(Product, product1.id).diagnostic8ds)

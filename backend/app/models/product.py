@@ -13,4 +13,4 @@ class Product(db.Model):
     )
 
     def __repr__(self):
-        print(f"<Product {self.id}>")
+        return f"<Product {self.id}>"

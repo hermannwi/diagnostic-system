@@ -1,4 +1,5 @@
 from backend.app.models.product import Product
+from backend.app.models.diagnostics_8d import Diagnostics8d
 from datetime import datetime
 from backend.app import db
 
@@ -80,3 +81,21 @@ def test_modify_product(client):
     response = client.put(f'/admin/products/{product.id}', json={'product': 'DSL100'})
 
     assert  response.get_json()['product'] == 'DSL100'
+
+
+
+
+
+
+def test_backref(client):
+    product1 = Product(product='EML200', created_at=datetime.now(), updated_at=datetime.now())
+    product2 = Product(product='EML100', created_at=datetime.now(), updated_at=datetime.now())
+    db.session.add(product1)
+    db.session.add(product2)
+    db.session.commit()
+
+    d_8d1 = Diagnostics8d(product_id=product1.id, issue='some issue', created_at=datetime.now(), updated_at=datetime.now())
+    d_8d2 = Diagnostics8d(product_id=product1.id, issue='some other issue', created_at=datetime.now(), updated_at=datetime.now())
+    db.session.add(d_8d1)
+    db.session.add(d_8d2)
+    db.session.commit()
