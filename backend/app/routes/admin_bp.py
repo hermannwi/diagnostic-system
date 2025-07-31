@@ -387,7 +387,7 @@ def add_question():
 @admin_bp.route('/questions/<int:id>', methods=['DELETE'])
 def delete_question(id):
     try:
-        deleted_count = Question.query.delete.filter_by(id=id).delete()
+        deleted_count = Question.query.filter_by(id=id).delete()
         if deleted_count == 0:
             return jsonify({'error': f'No records with id {id}'}), 404
         else:
@@ -395,6 +395,7 @@ def delete_question(id):
             return jsonify({'message': 'Record deleted successfully'}), 200
     except Exception as e:
         db.session.rollback()
+        print(f"Debug - Actual error: {e}")
         return jsonify({'error': f'Database error occurred'}), 500
 
 
