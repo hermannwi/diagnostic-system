@@ -43,7 +43,7 @@ def get_all_8ds():
 
 @admin_bp.route('/diagnostics8ds/<int:id>', methods=['GET'])
 def get_one_8d(id):
-    diagnostic_8d = Diagnostics8d.query.get(id)
+    diagnostic_8d = db.session.get(Diagnostics8d, id)
     if diagnostic_8d == None:
         return jsonify({'error', 'resource not found'}), 404
     else:
@@ -222,7 +222,7 @@ def get_all_products():
 
 @admin_bp.route('/products/<int:id>', methods=['GET'])
 def get_one_product(id):
-    product = Product.query.get(id)
+    product = db.session.get(Product, id)
     if product == None:
         return jsonify({"error": 'resource not found'}), 404
     else:
@@ -332,7 +332,7 @@ def get_all_questions():
 
 @admin_bp.route('/questions/<int:id>', methods=['GET'])
 def get_one_question(id):
-    question = Question.query.get(id)
+    question = db.session.get(Question, id)
     if question == None:
         return jsonify({'error': 'resource not found'}), 404
     else:
@@ -450,7 +450,7 @@ def get_all_root_causes():
 
 @admin_bp.route('/root-causes/<int:id>', methods=['GET'])
 def get_one_root_cause(id):
-    root_cause = RootCause.query.get(id)
+    root_cause = db.session.get(RootCause, id)
     if root_cause == None:
         return jsonify({'error': 'resource not found'}), 404
 
