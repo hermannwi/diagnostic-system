@@ -1,6 +1,7 @@
 from backend.app import db
 from datetime import datetime
 from flask import Blueprint, jsonify, request
+from sqlalchemy import exc
 from backend.app.models.diagnostics_8d import Diagnostics8d
 from backend.app.models.product import Product
 from backend.app.models.question import Question
@@ -271,67 +272,23 @@ def add_product():
         )
         db.session.add(new_product)
         db.session.commit()
-        return jsonify({'message': 'New product added successfully'}), 201
+        return jsonify({
+            'id': new_product.id,
+            'product': new_product.product,
+            'created_at': new_product.created_at,
+            'updated_at': new_product.updated_at
+        }), 201
+    
+    except exc.IntegrityError as e:
+        db.session.rollback()
+        if 'UNIQUE constraint failed' in str(e):
+            return jsonify({'error': 'Product already exists'}), 409
+        return jsonify({'error': 'Data integrity error'}), 400
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': 'Database error occurred'}), 500
     
-# def add_8d():
-#     data = request.json
-    
-#     if not data:
-#         return jsonify({'error': 'No data provided'}), 400
-    
-#     required_fields = ['product','issue']
-#     if not all(field in data for field in required_fields):
-#         return jsonify({'error': 'Missing required fields'}), 400
-    
-#     product = db.session.get(Product, data['product'])
-#     if not product:
-#         return jsonify({'error': 'Invalid product ID'}), 400
-#     product_id = product.id
 
-#     root_cause_id = None
-#     if data.get('root_cause'):
-#         root_cause = db.session.get(RootCause, data['root_cause'])
-#         if root_cause:
-#             root_cause_id = root_cause.id
-    
-#     try:
-
-#         new_diagnostic8d = Diagnostics8d(
-#             product_id=product_id,
-#             from_sn=data.get('from_sn'), 
-#             to_sn=data.get('to_sn'),
-#             from_version=data.get('from_version'),
-#             to_version=data.get('to_version'),
-#             from_supply_date=data.get('from_supply_date'),
-#             to_supply_date=data.get('to_supply_date'),
-#             from_sw=data.get('from_sw'),
-#             to_sw=data.get('to_sw'),
-#             issue=data['issue'],
-#             temporary_fix=data.get('temporary_fix'),
-#             root_cause_id=root_cause_id,
-#             corrective_action=data.get('corrective_action'),
-#             preventative_action=data.get('preventative_action'),
-#             verified_fix=data.get('verified_fix'),
-#             closed=data.get('closed'),
-#             link_8d=data.get('link_8d'),
-#             created_at=datetime.now(),
-#             updated_at=datetime.now()
-
-
-            
-#         )
-#         db.session.add(new_diagnostic8d)
-#         db.session.commit()
-#         return jsonify({'message': '8D Diagnostic created', 'id': new_diagnostic8d.id}), 201
-
-#     except Exception as e:
-        
-        
-#         db.session.rollback()
-#         return jsonify({'error': f'Database error occurred'}), 500
 
 @admin_bp.route('/products/<int:id>', methods=['DELETE'])
 def delete_product(id):
