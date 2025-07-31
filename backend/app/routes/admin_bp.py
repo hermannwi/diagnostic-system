@@ -49,28 +49,6 @@ def get_one_8d(id):
     else:
         return jsonify(
             dict_8d(diagnostic_8d))
-        # {'id': diagnostic_8d.id, 
-        #  'product_id': diagnostic_8d.product_id, 
-        #  'from_sn': diagnostic_8d.from_sn,  
-        #  'to_sn': diagnostic_8d.to_sn,
-        #  'from_version': diagnostic_8d.from_version,
-        #  'to_version': diagnostic_8d.to_version,
-        #  'from_supply_date': diagnostic_8d.from_supply_date,
-        #  'to_supply_date': diagnostic_8d.to_supply_date,
-        #  'from_sw': diagnostic_8d.from_sw,
-        #  'to_sw': diagnostic_8d.to_sv,
-        #  'issue': diagnostic_8d.issue,
-        #  'temporary_fix': diagnostic_8d.temporary_fix,
-        #  'root_cause_id': diagnostic_8d.root_cause_id,
-        #  'corrective_action': diagnostic_8d.corrective_action,
-        #  'preventative_action': diagnostic_8d.preventative_action,
-        #  'verified_fix': diagnostic_8d.verified_fix,
-        #  'closed': diagnostic_8d.closed,
-        #  'link_8d': diagnostic_8d.link_8d,
-        #  'created_at': diagnostic_8d.created_at,
-        #  'updated_at': diagnostic_8d.updated_at
-
-        #  })
     
 
 def dict_8d(diagnostic_8d):
@@ -256,7 +234,6 @@ def get_one_product(id):
 def add_product():
     data = request.json
     
-
     if not data:
         return jsonify({'error': 'No data provided'}), 400
     
@@ -292,8 +269,31 @@ def add_product():
 
 @admin_bp.route('/products/<int:id>', methods=['DELETE'])
 def delete_product(id):
-    #TODO
-    return None
+    try:
+        deleted_count = Product.query.filter_by(id=id).delete()
+        if deleted_count == 0:
+            return jsonify({'error': f'No records with id {id}'}), 404
+        else:
+            db.session.commit()
+            return jsonify({'message': 'Record deleted successfully'}), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Database error occurred'}), 500
+
+
+# def delete_8d(id):
+#     try:
+#         deleted_count = Diagnostics8d.query.filter_by(id=id).delete()
+#         if deleted_count == 0:
+#             return jsonify({'error': f'No records with id {id}'}), 404
+#         else:
+#             db.session.commit()
+#             return jsonify({'message': 'Record deleted successfully'}), 200
+        
+#     except Exception as e:
+#         db.session.rollback()
+#         return jsonify({'error': f'Database error occurred'}), 500
 
 @admin_bp.route('/products/<int:id>', methods=['PUT'])
 def modify_product(id):

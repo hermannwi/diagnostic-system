@@ -1,5 +1,6 @@
 from backend.app import db
 from backend.app.models.root_cause import RootCause
+from backend.app.models.product import Product
 
 class Diagnostics8d(db.Model):
     __tablename__ = "diagnostics_8d"
@@ -25,7 +26,8 @@ class Diagnostics8d(db.Model):
     created_at  = db.Column(db.DateTime, nullable=False)
     updated_at  = db.Column(db.DateTime, nullable=False)
     
-    __table_args__ = (db.ForeignKeyConstraint([root_cause_id], [RootCause.id]), )
+    __table_args__ = (db.ForeignKeyConstraint([root_cause_id], [RootCause.id]),
+                      db.ForeignKeyConstraint([product_id], [Product.id], name='fk_diagnostics_8d_product_id'))
 
     def __repr__(self):
         print(f"<Diagnostic {self.id}>")
