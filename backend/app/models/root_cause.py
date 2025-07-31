@@ -8,5 +8,7 @@ class RootCause(db.Model):
     created_at = db.Column(db.DateTime, nullable=False)
     updated_at = db.Column(db.DateTime, nullable=False)
 
+    questions = db.relationship('Question', backref='root_causes', secondary='root_cause_question', lazy="select")
+
     def __repr__(self):
         return f"<RootCause {self.id}>"
