@@ -445,7 +445,7 @@ def modify_question(id):
 def get_all_root_causes():
     root_causes = RootCause.query.all()
     return jsonify([{'id': rc.id, 
-                     'root_cause': rc.question,  
+                     'root_cause': rc.root_cause,  
                      "created_at": rc.created_at, 
                      "updated_at": rc.updated_at} for rc in root_causes]) 
 
@@ -457,7 +457,7 @@ def get_one_root_cause(id):
 
     else:
         return jsonify({'id': root_cause.id, 
-                     'root_cause': root_cause.question,  
+                     'root_cause': root_cause.root_cause,  
                      "created_at": root_cause.created_at, 
                      "updated_at": root_cause.updated_at})
 
@@ -496,7 +496,7 @@ def add_root_cause():
 @admin_bp.route('/root-causes/<int:id>', methods=['DELETE'])
 def delete_root_cause(id):
     try:
-        deleted_count = Product.query.filter_by(id=id).delete()
+        deleted_count = RootCause.query.filter_by(id=id).delete()
         if deleted_count == 0:
             return jsonify({'error': f'No records with id {id}'}), 404
         else:
