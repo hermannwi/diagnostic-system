@@ -17,7 +17,7 @@ class Diagnostics8d(db.Model):
     to_sw  = db.Column(db.VARCHAR, nullable = True)
     issue  = db.Column(db.Text, nullable=False)
     temporary_fix  = db.Column(db.Text, nullable=True)
-    root_cause_id  = db.Column(db.Text, nullable=True)
+    root_cause_id  = db.Column(db.Integer, nullable=True)
     corrective_action  = db.Column(db.Text, nullable=True)
     preventative_action  = db.Column(db.Text, nullable=True)
     verified_fix  = db.Column(db.Text, nullable=True)
@@ -28,6 +28,9 @@ class Diagnostics8d(db.Model):
     
     __table_args__ = (db.ForeignKeyConstraint([root_cause_id], [RootCause.id]),
                       db.ForeignKeyConstraint([product_id], [Product.id], name='fk_diagnostics_8d_product_id'))
+    
+    product = db.relationship('Product', backref='diagnostic8ds', lazy='select')
+    root_cause = db.relationship('RootCause', backref='diagnostic8ds', lazy='select')
 
     def __repr__(self):
         print(f"<Diagnostic {self.id}>")
