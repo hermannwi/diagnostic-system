@@ -58,7 +58,7 @@ def test_add_product_unique_constraint(client):
 
 # test delete
 
-def test_delete_record_existing_record(client):
+def test_delete_question_existing_record(client):
     product = Product(product='EML100', created_at=datetime.now(), updated_at=datetime.now())
     db.session.add(product)
     db.session.commit()
@@ -70,4 +70,13 @@ def test_delete_record_existing_record(client):
     assert  response.status_code == 200
     assert  Product.query.count() == 0
 
+# test modify
 
+def test_modify_product(client):
+    product = Product(product='EML100', created_at=datetime.now(), updated_at=datetime.now())
+    db.session.add(product)
+    db.session.commit()
+
+    response = client.put(f'/admin/products/{product.id}', json={'product': 'DSL100'})
+
+    assert  response.get_json()['product'] == 'DSL100'
