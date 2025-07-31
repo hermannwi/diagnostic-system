@@ -54,3 +54,20 @@ def test_add_product_unique_constraint(client):
     response = client.post('/admin/products', json=payload)
 
     assert  (response.status_code == 409)
+
+
+# test delete
+
+def test_delete_record_existing_record(client):
+    product = Product(product='EML100', created_at=datetime.now(), updated_at=datetime.now())
+    db.session.add(product)
+    db.session.commit()
+
+    assert  Product.query.count() == 1
+
+    response = client.delete(f'/admin/products/{product.id}')
+
+    assert  response.status_code == 200
+    assert  Product.query.count() == 0
+
+

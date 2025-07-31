@@ -282,23 +282,85 @@ def delete_product(id):
         return jsonify({'error': f'Database error occurred'}), 500
 
 
-# def delete_8d(id):
-#     try:
-#         deleted_count = Diagnostics8d.query.filter_by(id=id).delete()
-#         if deleted_count == 0:
-#             return jsonify({'error': f'No records with id {id}'}), 404
-#         else:
-#             db.session.commit()
-#             return jsonify({'message': 'Record deleted successfully'}), 200
-        
-#     except Exception as e:
-#         db.session.rollback()
-#         return jsonify({'error': f'Database error occurred'}), 500
 
 @admin_bp.route('/products/<int:id>', methods=['PUT'])
 def modify_product(id):
-    #TODO
-    return None
+    data = request.json
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    required_fields = ['product']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    try:
+        product_to_be_modified = db.session.get(Product, id)
+        if product_to_be_modified == None:
+            return jsonify({'error': 'data not found'}), 404
+        else:
+            product_to_be_modified.product = data['product']
+            product_to_be_modified.created_at = product_to_be_modified.created_at
+            product_to_be_modified.updated_at = datetime.now()
+    except Exception as e:
+        db.session.rollback()
+        print(f"Debug - Actual error: {e}")
+        return jsonify({'error': f'Database error occurred'}), 500 
+    
+    
+
+
+# @admin_bp.route('/diagnostics8ds/<int:id>', methods=['PUT'])
+# def modify_8d(id):
+#     data = request.json
+#     if not data:
+#         return jsonify({'error': 'No data provided'}), 400
+    
+#     required_fields = ['product','issue']
+#     if not all(field in data for field in required_fields):
+#         return jsonify({'error': 'Missing required fields'}), 400
+    
+#     product = db.session.get(Product, data['product'])
+#     if not product:
+#         return jsonify({'error': 'Invalid product'}), 400
+#     product_id = product.id
+
+#     root_cause_id = None
+#     if data.get('root_cause'):
+#         root_cause = db.session.get(RootCause, data['root_cause'])
+#         if root_cause:
+#             root_cause_id = root_cause.id
+    
+#     try:
+#         retrieved_8d = db.session.get(Diagnostics8d, id)
+#         if retrieved_8d == None:
+#             return jsonify({'error': 'data not found'}), 404
+#         else:
+#             retrieved_8d.product_id=product_id
+#             retrieved_8d.from_sn=data.get('from_sn') 
+#             retrieved_8d.to_sn=data.get('to_sn')
+#             retrieved_8d.from_version=data.get('from_version')
+#             retrieved_8d.to_version=data.get('to_version')
+#             retrieved_8d.from_supply_date=data.get('from_supply_date')
+#             retrieved_8d.to_supply_date=data.get('to_supply_date')
+#             retrieved_8d.from_sw=data.get('from_sw')
+#             retrieved_8d.to_sw=data.get('to_sw')
+#             retrieved_8d.issue=data['issue']
+#             retrieved_8d.temporary_fix=data.get('temporary_fix')
+#             retrieved_8d.root_cause_id=root_cause_id
+#             retrieved_8d.corrective_action=data.get('corrective_action')
+#             retrieved_8d.preventative_action=data.get('preventative_action')
+#             retrieved_8d.verified_fix=data.get('verified_fix')
+#             retrieved_8d.closed=data.get('closed')
+#             retrieved_8d.link_8d=data.get('link_8d')
+#             retrieved_8d.created_at=retrieved_8d.created_at
+#             retrieved_8d.updated_at=datetime.now()
+
+#             db.session.commit()
+#             return jsonify({'message': '8D Diagnostic updated', 'id': id, 'object': dict_8d(retrieved_8d)}), 200
+
+#     except Exception as e:
+#         db.session.rollback()
+#         print(f"Debug - Actual error: {e}")
+#         return jsonify({'error': f'Database error occurred'}), 500 
 
 # endregion
 
