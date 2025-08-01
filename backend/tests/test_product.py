@@ -28,3 +28,5 @@ def insert_one():
     new_record = Product(product="eml-100", created_at=datetime.now(), updated_at=datetime.now())
     db.session.add(new_record)
     db.session.flush()
+
+

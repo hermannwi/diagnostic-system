@@ -16,6 +16,8 @@ import traceback
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
+
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -24,7 +24,6 @@ def test_get_all(app, client):
     print(f'response: {retrieved_8ds.get_json()}')
 
 
-
 # test add
 
 def test_add_8d_success(app, client):
@@ -101,3 +100,6 @@ def create_8d():
     db.session.commit()
     return d_8d
     
+
+
+

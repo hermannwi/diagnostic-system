@@ -87,15 +87,6 @@ def test_modify_product(client):
 
 
 
-def test_backref(client):
-    product1 = Product(product='EML200', created_at=datetime.now(), updated_at=datetime.now())
-    product2 = Product(product='EML100', created_at=datetime.now(), updated_at=datetime.now())
-    db.session.add(product1)
-    db.session.add(product2)
-    db.session.commit()
 
-    d_8d1 = Diagnostics8d(product_id=product1.id, issue='some issue', created_at=datetime.now(), updated_at=datetime.now())
-    d_8d2 = Diagnostics8d(product_id=product1.id, issue='some other issue', created_at=datetime.now(), updated_at=datetime.now())
-    db.session.add(d_8d1)
-    db.session.add(d_8d2)
-    db.session.commit()
+
+
