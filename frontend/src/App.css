@@ -17,3 +17,11 @@
 button {
   margin: 10px;
 }
+
+.product-input {
+  border-color: black;
+}
+
+table, th, td {
+  border: 1px
+}
