@@ -1,11 +1,11 @@
-from backend.app import db
+from .. import db
 from datetime import datetime
 from flask import Blueprint, jsonify, request
 from sqlalchemy import exc
-from backend.app.models.diagnostics_8d import Diagnostics8d
-from backend.app.models.product import Product
-from backend.app.models.question import Question
-from backend.app.models.root_cause import RootCause
+from ..models.diagnostics_8d import Diagnostics8d
+from ..models.product import Product
+from ..models.question import Question
+from ..models.root_cause import RootCause
 
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")

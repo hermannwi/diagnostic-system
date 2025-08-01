@@ -1,6 +1,6 @@
-from backend.app import db
-from backend.app.models.root_cause import RootCause
-from backend.app.models.product import Product
+from .. import db
+from .root_cause import RootCause
+from .product import Product
 
 class Diagnostics8d(db.Model):
     __tablename__ = "diagnostics_8d"

@@ -1,4 +1,4 @@
-from backend.app import db
+from .. import db
 
 class Question(db.Model):
     __tablename__ = "Question"

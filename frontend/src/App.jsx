@@ -15,7 +15,8 @@ export default function App() {
         try {
             const response = await fetch('http://localhost:5001/admin/diagnostics8ds')
             const data = await response.json()
-            setAllDiagnostic8ds(data)
+            setAllDiagnostic8ds(response)
+            console.log(response)
         } catch (error) {
             console.error('Error fetching diagnostics:', error)
         }
@@ -66,7 +67,8 @@ export default function App() {
                                                 
         </div>
             <div>
-                <DiagnosticTable openDiagnosticViewForm={openDiagnosticViewForm}/>
+                <DiagnosticTable openDiagnosticViewForm={openDiagnosticViewForm}
+                                 allDiagnostic8ds={allDiagnostic8ds}/>
             </div>
             
         </>

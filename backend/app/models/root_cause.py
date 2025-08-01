@@ -1,4 +1,4 @@
-from backend.app import db
+from .. import db
 
 class RootCause(db.Model):
     __tablename__ = "root_cause"
