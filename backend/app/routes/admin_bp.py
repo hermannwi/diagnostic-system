@@ -323,7 +323,7 @@ def modify_product(id):
 def get_all_questions():
     questions = Question.query.all()
     return jsonify([{'id': q.id, 
-                     'questions': q.question, 
+                     'question': q.question, 
                      "description": q.description, 
                      "help_text_link": q.help_text_link, 
                      "help_image_link": q.help_image_link,

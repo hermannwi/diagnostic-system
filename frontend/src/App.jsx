@@ -2,15 +2,20 @@ import React, { useState, useEffect } from 'react'
 import DiagnosticForm from './components/DiagnosticForm'
 import DiagnosticTable from './components/DiagnosticTable'
 import ProductForm from './components/ProductForm'
+import QuestionForm from './components/QuestionForm'
+import './App.css'
+
 
 
 
 export default function App() {
     const [showProductForm, setShowProductForm] = useState(false)
-    const [showDiagnosticForm, setShowDiagnosticForm] = useState('none')
+    const [showDiagnosticForm, setShowDiagnosticForm] = useState(false)
+    const [showQuestionForm, setShowQuestionForm] = useState(false)
     const [selectedDiagnostic, setSelectedDiagnostic] = useState()
     const [allDiagnostic8ds, setAllDiagnostic8ds] = useState([])
     const [allProducts, setAllProducts] = useState([])
+    const [allQuestions, setAllQuestions] = useState([])
 
     const fetchDiagnostics = async () => {
         try {
@@ -34,6 +39,19 @@ export default function App() {
         }
     }
 
+    const fetchQuestions = async () => {
+        try {
+            const response = await fetch('http://localhost:5001/admin/questions')
+            const data = await response.json()
+            setAllQuestions(data)
+            console.log(response)
+
+        } catch {
+            console.error('Error fetching questions:', error)
+        }
+    }
+
+
     useEffect(() => {
         fetchDiagnostics()
     }, [])
@@ -42,54 +60,57 @@ export default function App() {
         fetchProducts()
     }, [])
 
+    useEffect(() => {
+        fetchQuestions()
+    }, [])
+
     
 
 
     
 
     function toggleProductForm() {
+        setShowQuestionForm(false)
+        setShowDiagnosticForm(false)
         setShowProductForm(prev => !prev)
     }
 
-    function openDiagnosticAddForm() {
-        setShowDiagnosticForm('add')
-        setSelectedDiagnostic(null)
+    function toggleDiagnosticForm() {
+        setShowQuestionForm(false)
+        setShowProductForm(false)
+        setShowDiagnosticForm(prev => !prev)
     }
 
-    function openDiagnosticViewForm(diagnostic) {
-        setSelectedDiagnostic(diagnostic)
-        setShowDiagnosticForm('view')
+    function toggleQuestionForm() {
+        setShowDiagnosticForm(false)
+        setShowProductForm(false)
+        setShowQuestionForm(prev => !prev)
     }
 
-    function switchToEditMode() {
-        setShowDiagnosticForm('edit')
-    }
-
-    function closeDiagnosticForm() {
-        setShowDiagnosticForm('none')
-        setSelectedDiagnostic(null)
-    }
+    
 
     return (
         <>
         <header>
             <button onClick={toggleProductForm}>Add Product</button>
-            <button onClick={openDiagnosticAddForm}>Add New 8D</button>
+            <button onClick={toggleDiagnosticForm}>Add 8D</button>
+            <button onClick={toggleQuestionForm}>Add Question</button>
         </header>
-        <div>
+        <div className='forms'>
             {showProductForm && <ProductForm toggleProductForm={toggleProductForm}
                                              allProducts={allProducts}
                                              fetchProducts={fetchProducts}/> }
-            {showDiagnosticForm != 'none' && <DiagnosticForm 
+            {showDiagnosticForm && <DiagnosticForm 
                                                 selectedDiagnostic={selectedDiagnostic} 
-                                                switchToEditMode={switchToEditMode}
-                                                closeDiagnosticForm={closeDiagnosticForm}
                                                 showDiagnosticForm={showDiagnosticForm}/>}
+            {showQuestionForm && <QuestionForm 
+                                                allQuestions={allQuestions}
+                                                fetchQuestions={fetchQuestions}/>}
                                                 
                                                 
         </div>
-            <div>
-                <DiagnosticTable openDiagnosticViewForm={openDiagnosticViewForm}
+            <div className='diagnostic-table'>
+                <DiagnosticTable 
                                  allDiagnostic8ds={allDiagnostic8ds}/>
             </div>
             

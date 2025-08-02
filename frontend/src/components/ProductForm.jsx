@@ -23,6 +23,7 @@ export default function ProductForm(props) {
         if (response.ok) {
             setProductName('')  
             console.log('success')
+            props.fetchProducts()
             
         }
     } catch (error) {
