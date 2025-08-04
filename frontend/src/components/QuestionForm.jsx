@@ -45,9 +45,9 @@ export default function QuestionForm(props) {
                     <label htmlFor="description">Description: </label>
                     <input type="text" id='description' name='description' value={description} onChange={(e) => setDescription(e.target.value)}/>
                     <label htmlFor="help_text_link">Help Text Link: </label>
-                    <input type="text" id='help_text_link' name='help_text_link' value={helpTextLink} onChange={(e) => setEditHelpTextLink(e.target.value)}/>
+                    <input type="text" id='help_text_link' name='help_text_link' value={helpTextLink} onChange={(e) => setHelpTextLink(e.target.value)}/>
                     <label htmlFor="help_image_link">Help Image Link: </label>
-                    <input type="text" id='help_image_link' name='help_image_link' value={helpImageLink} onChange={(e) => setEditHelpImageLink(e.target.value)}/>
+                    <input type="text" id='help_image_link' name='help_image_link' value={helpImageLink} onChange={(e) => setHelpImageLink(e.target.value)}/>
                 </div>
                 
                 <button>ADD</button>

@@ -12,5 +12,8 @@ class Product(db.Model):
         db.UniqueConstraint('product', name='uq_product_product'),
     )
 
+    questions = db.relationship('Question', backref='products', secondary='product_question', lazy="select")
+
+
     def __repr__(self):
         return f"<Product {self.id}>"

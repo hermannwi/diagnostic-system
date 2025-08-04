@@ -11,6 +11,10 @@ class Question(db.Model):
     created_at = db.Column(db.DateTime, nullable=False)
     updated_at = db.Column(db.DateTime, nullable=False)
 
+    __table_args__ = (
+        db.UniqueConstraint('question', name='uq_question_question'),
+    )
+
     def __repr__(self):
         return f"<Question {self.id}>"
 

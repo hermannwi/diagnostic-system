@@ -24,7 +24,7 @@ def create_app(config_class=Config):
     from .models.diagnostics_8d import Diagnostics8d
     from .models.product import Product
     from .models.question import Question
-    from .models.root_cause_question import RootCauseQuestion
+    from .models.diagnostics_8d_question import Diagnostics8dQuestion
     from .models.root_cause import RootCause
 
     from .routes.admin_bp import admin_bp
