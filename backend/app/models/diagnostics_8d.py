@@ -21,7 +21,7 @@ class Diagnostics8d(db.Model):
     corrective_action  = db.Column(db.Text, nullable=True)
     preventative_action  = db.Column(db.Text, nullable=True)
     verified_fix  = db.Column(db.Text, nullable=True)
-    closed = db.Column(db.Boolean, nullable = True)
+    closed = db.Column(db.Boolean, nullable = False)
     link_8d  = db.Column(db.Text, nullable=True)
     created_at  = db.Column(db.DateTime, nullable=False)
     updated_at  = db.Column(db.DateTime, nullable=False)
@@ -31,6 +31,7 @@ class Diagnostics8d(db.Model):
     
     product = db.relationship('Product', backref='diagnostic8ds', lazy='select')
     root_cause = db.relationship('RootCause', backref='diagnostic8ds', lazy='select')
+    questions = db.relationship('Question', backref='diagnostics_8ds', secondary='diagnostics_8d_question', lazy="select")
 
     def __repr__(self):
         return f"<Diagnostic {self.id}>"

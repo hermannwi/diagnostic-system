@@ -84,7 +84,7 @@ def add_8d():
     if not data:
         return jsonify({'error': 'No data provided'}), 400
     
-    required_fields = ['product','issue']
+    required_fields = ['product','issue', 'closed']
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Missing required fields'}), 400
     

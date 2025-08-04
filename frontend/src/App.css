@@ -97,3 +97,26 @@ input {
   align-items: center;
   justify-content: center;
 }
+
+.diagnostic-form form {
+  display: grid;
+  grid-template-columns: 150px 1fr; /* label | input */
+  gap: 0.5rem 1rem; /* row gap | column gap */
+  align-items: left;
+  justify-content: center;
+  max-width: 600px;
+}
+
+.diagnostic-form input,
+.diagnostic-form select {
+  margin: 4px 10px; /* top & bottom */
+}
+
+div.last-part {
+  grid-column: span 2;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  
+  
+}

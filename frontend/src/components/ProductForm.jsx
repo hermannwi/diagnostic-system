@@ -4,11 +4,11 @@ export default function ProductForm(props) {
 
     const [productName, setProductName] = useState('')
     const [editProductName, setEditProductName] = useState('')
-    const [isEditing, setIsEditing] = useState(false)
     const [editingID, setEditingID] = useState(null)
 
 
     const handleSubmit = async (event) => {
+        
     event.preventDefault()
     
     try {

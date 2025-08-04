@@ -34,7 +34,7 @@ export default function App() {
             const data = await response.json()
             setAllProducts(data)
             console.log(data)
-        } catch {
+        } catch (error) {
             console.error('Error fetching products:', error)
         }
     }
@@ -46,7 +46,7 @@ export default function App() {
             setAllQuestions(data)
             console.log(response)
 
-        } catch {
+        } catch (error) {
             console.error('Error fetching questions:', error)
         }
     }
@@ -101,8 +101,7 @@ export default function App() {
                                              allProducts={allProducts}
                                              fetchProducts={fetchProducts}/> }
             {showDiagnosticForm && <DiagnosticForm 
-                                                selectedDiagnostic={selectedDiagnostic} 
-                                                showDiagnosticForm={showDiagnosticForm}/>}
+                                                allProducts={allProducts}/>}
             {showQuestionForm && <QuestionForm 
                                                 allQuestions={allQuestions}
                                                 fetchQuestions={fetchQuestions}/>}
