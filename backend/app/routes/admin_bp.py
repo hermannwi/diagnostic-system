@@ -209,6 +209,68 @@ def modify_8d(id):
         db.session.rollback()
         print(f"Debug - Actual error: {e}")
         return jsonify({'error': f'Database error occurred'}), 500 
+    
+
+@admin_bp.route('/diagnostics_8ds/<int:id>/questions/new', methods=['POST'])   
+def connect_new_question_to_8d(id):
+    data = request.json
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    required_fields = ['question']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    diagnostic_8d = db.session.get(Diagnostics8d, id)
+    if diagnostic_8d == None:
+        return jsonify({'error': f'No 8d with id {id}'}), 404
+    new_question = create_question_service(data)
+    try:
+        
+        
+        db.session.add(new_question)
+        diagnostic_8d.questions.append(new_question)
+        db.session.commit()
+        return jsonify({
+            'diagnostics_8d_id': id,
+            'question_id': new_question.id
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Debug - Actual error: {e}")
+        return jsonify({'error': f'Database error occurred'}), 500 
+        
+
+    
+
+
+
+@admin_bp.route('/diagnostics_8ds/<int:id>/questions', methods=['POST'])   
+def connect_existing_question_to_8d(id):
+    data = request.json
+    
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    required_fields = ['id']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    diagnostic_8d = db.session.get(Diagnostics8d, id)
+    if diagnostic_8d == None:
+        return jsonify({'error': f'No 8d with id {id}'}), 404
+    question = db.session.get(Question, data['id'])
+    if question == None:
+        return jsonify({'error': f'No question with id {data["id"]}'}), 404 
+    try:
+        diagnostic_8d.questions.append(question)
+        db.session.commit()
+        return jsonify({
+            'diagnostics_8d_id': id,
+            'question_id': question.id
+        }), 201
+    except Exception as e:
+        return jsonify({'error': 'Database error occured'}), 500
+
 
 # endregion
 
@@ -348,7 +410,6 @@ def get_one_question(id):
 @admin_bp.route('/questions', methods=['POST'])
 def add_question():
     data = request.json
-
     if not data:
         return jsonify({'error': 'No data provided'}), 400
    
@@ -357,15 +418,9 @@ def add_question():
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Missing required fields'}), 400
     
+
     try:
-        new_question = Question(
-            question=data['question'],
-            description=data.get('description'),
-            help_text_link=data.get('help_text_link'),
-            help_image_link=data.get('help_image_link'),
-            created_at=datetime.now(),
-            updated_at=datetime.now()
-        )
+        new_question = create_question_service(data)
         db.session.add(new_question)
         db.session.commit()
         return jsonify({
@@ -435,6 +490,8 @@ def modify_question(id):
         print(f"Debug - Actual error: {e}")
         return jsonify({'error': f'Database error occurred'}), 500 
 
+
+    
 
 
 # endregion
@@ -543,3 +600,17 @@ def modify_root_cause(id):
 
 
 
+def create_question_service(question_data):
+        new_question = Question(
+            question=question_data['question'],
+            description=question_data.get('description'),
+            help_text_link=question_data.get('help_text_link'),
+            help_image_link=question_data.get('help_image_link'),
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        
+        return new_question
+
+
+   
