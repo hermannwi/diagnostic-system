@@ -93,11 +93,8 @@ def add_8d():
         return jsonify({'error': 'Invalid product ID'}), 400
     product_id = product.id
 
-    root_cause_id = None
-    if data.get('root_cause'):
-        root_cause = db.session.get(RootCause, data['root_cause'])
-        if root_cause:
-            root_cause_id = root_cause.id
+    
+        
     
     try:
 
@@ -113,7 +110,7 @@ def add_8d():
             to_sw=data.get('to_sw'),
             issue=data['issue'],
             temporary_fix=data.get('temporary_fix'),
-            root_cause_id=root_cause_id,
+            root_cause_id=data.get('root_cause_id'),
             corrective_action=data.get('corrective_action'),
             preventative_action=data.get('preventative_action'),
             verified_fix=data.get('verified_fix'),
@@ -211,7 +208,7 @@ def modify_8d(id):
         return jsonify({'error': f'Database error occurred'}), 500 
     
 
-@admin_bp.route('/diagnostics_8ds/<int:id>/questions/new', methods=['POST'])   
+@admin_bp.route('/diagnostics8ds/<int:id>/questions/new', methods=['POST'])   
 def connect_new_question_to_8d(id):
     data = request.json
     if not data:
@@ -245,7 +242,7 @@ def connect_new_question_to_8d(id):
 
 
 
-@admin_bp.route('/diagnostics_8ds/<int:id>/questions', methods=['POST'])   
+@admin_bp.route('/diagnostics8ds/<int:id>/questions', methods=['POST'])   
 def connect_existing_question_to_8d(id):
     data = request.json
     

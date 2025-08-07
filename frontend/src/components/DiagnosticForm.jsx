@@ -1,23 +1,27 @@
 import { useState } from "react"
 
+
 export default function DiagnosticForm(props) {
     const [selectedProduct, setSelectedProduct] = useState('')
-    const [fromSn, setFromSn] = useState('')
-    const [toSn, setToSn] = useState('')
-    const [fromVersion, setFromVersion] = useState('')
-    const [toVersion, setToVersion] = useState('')
-    const [fromSupplyDate, setFromSupplyDate] = useState('')
-    const [toSupplyDate, setToSupplyDate] = useState('')
-    const [fromSw, setFromSw] = useState('')
-    const [toSw, setToSw] = useState('')
-    const [issue, setIssue] = useState('')
-    const [temporaryFix, setTemporaryFix] = useState('')
-    const [rootCause, setRootCause] = useState('')
-    const [correctiveAction, setCorrectiveAction] = useState('')
-    const [preventativeAction, setPreventativeAction] = useState('')
+    
+    const [fromSn, setFromSn] = useState('12')
+    const [toSn, setToSn] = useState('12')
+    const [fromVersion, setFromVersion] = useState('12')
+    const [toVersion, setToVersion] = useState('12')
+    const [fromSupplyDate, setFromSupplyDate] = useState('12')
+    const [toSupplyDate, setToSupplyDate] = useState('12')
+    const [fromSw, setFromSw] = useState('12')
+    const [toSw, setToSw] = useState('12')
+    const [issue, setIssue] = useState('issue')
+    const [question, setQuestion] = useState('')
+    const [allQuestions, setAllQuestions] = useState([])
+    const [temporaryFix, setTemporaryFix] = useState('temp')
+    const [rootCause, setRootCause] = useState('cause')
+    const [correctiveAction, setCorrectiveAction] = useState('cor')
+    const [preventativeAction, setPreventativeAction] = useState('cor')
     const [verifiedFix, setVerifiedFix] = useState(null)
     const [closed, setClosed] = useState(false)
-    const [link8d, setLink8d] = useState('')
+    const [link8d, setLink8d] = useState('link')
 
     const handleVerifiedFix = (newValue) => {
     setVerifiedFix(prev => prev === newValue ? null : newValue); // toggle off if same value
@@ -26,21 +30,114 @@ export default function DiagnosticForm(props) {
     const handleProductChange = (event) => {
         setSelectedProduct(event.target.value)
     }
+
+    const handleSubmit = async (event) => {
+        event.preventDefault()
+
+        try {
+            const rootCauseResponse = await fetch('http://localhost:5001/admin/root-causes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({root_cause: rootCause})
+            })
+
+            var rootCauseId = null
+            if (rootCauseResponse.ok) {
+                const rootCauseData =  await rootCauseResponse.json() 
+                console.log(rootCauseData)
+                rootCauseId = rootCauseData.id
+            }
+            
+            const response = await fetch('http://localhost:5001/admin/diagnostics8ds', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    product: selectedProduct,
+                    from_sn: fromSn,
+                    to_sn: toSn,
+                    from_version: fromVersion,
+                    to_version: toVersion,
+                    from_supply_date: fromSupplyDate,
+                    to_supply_date: toSupplyDate,
+                    from_sw: fromSw,
+                    to_sw: toSw,
+                    issue: issue,
+                    temporary_fix: temporaryFix,
+                    root_cause_id: rootCauseId,
+                    corrective_action: correctiveAction,
+                    preventative_action: preventativeAction,
+                    verified_fix: verifiedFix,
+                    closed: closed,
+                    link_8d: link8d
+                })
+            })
+            if (response.ok) {
+            setSelectedProduct('')
+            setFromSn('')
+            setToSn('')
+            setFromVersion('')
+            setToVersion('')
+            setToSupplyDate('')
+            setFromSupplyDate('')
+            setToSw('')
+            setFromSw('')
+            setIssue('')
+            setTemporaryFix('')
+            setRootCause('')
+            setCorrectiveAction('')
+            setPreventativeAction('')
+            setVerifiedFix(null)
+            setClosed(false)
+            setLink8d('')
+            props.fetchDiagnostics()  
+        }
+            else {
+                const errorData = await response.json();
+                console.log(errorData);
+            }
+        
+
+        } catch (error) {
+            console.error('Error adding 8d:', error)
+        }
+
+
+    }
     
+    function addQuestion(event) {
+        event.preventDefault()
+        const questionObj = {
+            id: Math.random().toString(16).slice(2),
+            question: question
+        }
+        setAllQuestions(prev => [...prev, questionObj])
+        
+        setQuestion('')
+
+    }
+
+    function handleDeleteQuestion(id) {
+        const newArray= allQuestions.filter(question => question.id !== id)
+        setAllQuestions(newArray)
+    }
 
     return (
     <section className="diagnostic-form">
         <h1>8D report form</h1>
-        <form>
+        <form onSubmit={handleSubmit} method='post'>
             <label htmlFor="product">Product: </label>
             <select name="product" id="product"
                     value={selectedProduct}
                     onChange={handleProductChange}>
                     <option value=''>Select a product...</option>
                     {props.allProducts.map(product => {
-                        <option key={product.id} value={product.id}>
+                        return (<option key={product.id} value={product.id}>
                             {product.product}
-                        </option>
+                        </option>)
                     })}
                     </select>
 
@@ -89,6 +186,16 @@ export default function DiagnosticForm(props) {
             <input type="text" name="issue" id="issue"
                    value={issue}
                    onChange={(e) => setIssue(e.target.value)}/>
+            
+            <label htmlFor="question">Add Questions: </label>
+            <input type="text"  name="question" id="question"
+                   value={question} onChange={(e) => setQuestion(e.target.value)}/>
+                    <button className="add-question-button" type='button' onClick={addQuestion}>ADD</button>
+            <ol>
+                {allQuestions.map(question => {
+                    return <li key={question.id}>{question.question} <button onClick={() => handleDeleteQuestion(question.id)}>Delete</button></li>
+                })}
+            </ol>
 
             <label htmlFor="temporary_fix">Temporary Fix: </label>
             <input type="text" name="temporary_fix" id="temporary_fix"
@@ -148,7 +255,7 @@ export default function DiagnosticForm(props) {
                    checked={closed} onChange={() => {
                     setClosed(prev => !prev)
                    }}/>
-
+        <button>ADD</button>
         </form>
     </section>)
 }

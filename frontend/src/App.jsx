@@ -94,23 +94,25 @@ export default function App() {
         <header>
             <button onClick={toggleProductForm}>Add Product</button>
             <button onClick={toggleDiagnosticForm}>Add 8D</button>
-            <button onClick={toggleQuestionForm}>Add Question</button>
+            {/* <button onClick={toggleQuestionForm}>Add Question</button> */}
         </header>
         <div className='forms'>
             {showProductForm && <ProductForm toggleProductForm={toggleProductForm}
                                              allProducts={allProducts}
                                              fetchProducts={fetchProducts}/> }
             {showDiagnosticForm && <DiagnosticForm 
-                                                allProducts={allProducts}/>}
-            {showQuestionForm && <QuestionForm 
+                                                allProducts={allProducts} fetchDiagnostics={fetchDiagnostics}/>
+                                                }
+            {/* {showQuestionForm && <QuestionForm 
                                                 allQuestions={allQuestions}
-                                                fetchQuestions={fetchQuestions}/>}
+                                                fetchQuestions={fetchQuestions}/>} */}
                                                 
                                                 
         </div>
             <div className='diagnostic-table'>
                 <DiagnosticTable 
-                                 allDiagnostic8ds={allDiagnostic8ds}/>
+                                 allDiagnostic8ds={allDiagnostic8ds}
+                                 allProducts={allProducts}/>
             </div>
             
         </>

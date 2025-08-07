@@ -85,13 +85,17 @@ input {
 }
 
 .diagnostic-table {
-  display: flex;
-  justify-content: center;
-  align-items: baseline;
+  
   
   margin-top: 50px;
 }
 
+.scroll-box {
+  width: 1000px;
+  height: 750px;
+  overflow: auto;
+  border: 1px solid #ccc;
+}
 .question-inputs {
   display: flex;
   align-items: center;
@@ -119,4 +123,9 @@ div.last-part {
   align-items: center;
   
   
+}
+
+.add-question-button {
+  height: 40px;
+  width: 125px;
 }
