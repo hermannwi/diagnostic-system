@@ -142,12 +142,13 @@ def add_8d():
 @admin_bp.route('/diagnostics8ds/<int:id>', methods=['DELETE'])
 def delete_8d(id):
     try:
-        deleted_count = Diagnostics8d.query.filter_by(id=id).delete()
-        if deleted_count == 0:
-            return jsonify({'error': f'No records with id {id}'}), 404
-        else:
+        diagnostic_8d = db.session.get(Diagnostics8d, id)
+        if diagnostic_8d:
+            db.session.delete(diagnostic_8d)  # ORM handles relationships
             db.session.commit()
-            return jsonify({'message': 'Record deleted successfully'}), 200
+            return jsonify({'message': 'Record deleted successfully'}), 200       
+        else:
+            return jsonify({'error': f'No records with id {id}'}), 404
         
     except Exception as e:
         db.session.rollback()
@@ -553,21 +554,34 @@ def add_root_cause():
     required_fields = ['root_cause']
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Missing required fields'}), 400
-
+    
+    
+    
     try:
-        new_root_cause = RootCause(
-            root_cause = data['root_cause'],
-            created_at = datetime.now(),
-            updated_at = datetime.now()
-        )
-        db.session.add(new_root_cause)
-        db.session.commit()
-        return jsonify({
-            'id': new_root_cause.id,
-            'root_cause': new_root_cause.root_cause,
-            'created_at': new_root_cause.created_at,
-            'updated_at': new_root_cause.updated_at
-        }), 201
+        existing_root_cause = RootCause.query.filter_by(root_cause=data['root_cause']).first()
+        print(existing_root_cause)
+        if existing_root_cause:
+            return jsonify({
+                'id': existing_root_cause.id,
+                'root_cause': existing_root_cause.root_cause,
+                'created_at': existing_root_cause.created_at,
+                'updated_at': existing_root_cause.updated_at
+            }), 201
+        else:
+        
+            new_root_cause = RootCause(
+                root_cause = data['root_cause'],
+                created_at = datetime.now(),
+                updated_at = datetime.now()
+            )
+            db.session.add(new_root_cause)
+            db.session.commit()
+            return jsonify({
+                'id': new_root_cause.id,
+                'root_cause': new_root_cause.root_cause,
+                'created_at': new_root_cause.created_at,
+                'updated_at': new_root_cause.updated_at
+            }), 201
 
     except Exception as e:
         db.session.rollback()

@@ -284,7 +284,8 @@ export default function DiagnosticForm(props) {
             <label htmlFor="closed" className='closed'>Closed: </label>
             <input type="checkbox" name="closed" id="closed"
                    value={closed}
-                   checked={closed} onChange={() => {
+                   checked={closed} 
+                   onChange={() => {
                     setClosed(prev => !prev)
                    }}/>
         <button>ADD</button>
