@@ -6,6 +6,7 @@ from ..models.diagnostics_8d import Diagnostics8d
 from ..models.product import Product
 from ..models.question import Question
 from ..models.root_cause import RootCause
+from ..models.system import System
 
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -64,7 +65,7 @@ def dict_8d(diagnostic_8d):
          'from_sw': diagnostic_8d.from_sw,
          'to_sw': diagnostic_8d.to_sw,
          'issue': diagnostic_8d.issue,
-         'questions': [{'id': q.id, 'question': q.question} for q in d.questions],
+         'questions': [{'id': q.id, 'question': q.question} for q in diagnostic_8d.questions],
          'temporary_fix': diagnostic_8d.temporary_fix,
          'root_cause_id': diagnostic_8d.root_cause_id,
          'corrective_action': diagnostic_8d.corrective_action,
@@ -635,7 +636,112 @@ def modify_root_cause(id):
 
 # endregion
 
+# region routes for the system table
 
+@admin_bp.route('/systems', methods=['GET'])
+def get_all_systems():
+    systems = System.query.all()
+    return jsonify([
+        {'id': s.id, 
+         'system': s.system,
+         'created_at': s.created_at,
+         'updated_at': s.updated_at
+
+         } for s in systems])
+
+@admin_bp.route('/systems/<int:id>', methods=['GET'])
+def get_one_system(id):
+    system = db.session.get(System, id)
+    if system == None:
+        return jsonify({'error', 'resource not found'}), 404
+    else:
+        return jsonify({
+         'id': system.id, 
+         'system': system.system,
+         'created_at': system.created_at,
+         'updated_at': system.updated_at
+        })
+    
+
+@admin_bp.route('/systems', methods=['POST'])
+def add_system():
+    data = request.json
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+    required_fields = ['system']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    try:
+        new_system = System(
+            system=data['system'],
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        db.session.add(new_system)
+        db.session.commit()
+        return jsonify({
+            'id': new_system.id,
+            'system': new_system.system,
+            'created_at': new_system.created_at,
+            'updated_at': new_system.updated_at
+        }), 201
+    except exc.IntegrityError as e:
+        db.session.rollback()
+        if 'UNIQUE constraint failed' in str(e):
+            return jsonify({'error': 'System already exists'}), 409
+        return jsonify({'error': 'Data integrity error'}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Database error occurred'}), 500
+    
+
+@admin_bp.route(f'/systems/<int:id>', methods=['DELETE'])
+def delete_system(id):
+    try:
+        system = db.session.get(System, id)
+        if system:
+            db.session.delete(system)  # ORM handles relationships
+            db.session.commit()
+            return jsonify({'message': 'Record deleted successfully'}), 200       
+        else:
+            return jsonify({'error': f'No records with id {id}'}), 404
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Database error occurred'}), 500
+
+
+@admin_bp.route(f'/systems/<int:id>', methods=['PUT'])
+def modify_system(id):
+    data = request.json
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+
+    required_fields = ['system']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+    try:
+        system_to_be_modified = db.session.get(System, id)
+        if system_to_be_modified == None:
+            return jsonify({'error': 'data not found'}), 404
+        else:
+            system_to_be_modified.system = data['system']
+            system_to_be_modified.updated_at = datetime.now()
+
+            db.session.commit()
+            return jsonify({
+                'id': system_to_be_modified.id,
+                'root_cause': system_to_be_modified.system,
+                'created_at': system_to_be_modified.created_at,
+                'updated_at': system_to_be_modified.updated_at
+            })
+    except Exception as e:
+        db.session.rollback()
+        print(f"Debug - Actual error: {e}")
+        return jsonify({'error': f'Database error occurred'}), 500 
+
+# endregion
 
 def create_question_service(question_data):
         new_question = Question(
