@@ -112,7 +112,8 @@ export default function App() {
             <div className='diagnostic-table'>
                 <DiagnosticTable 
                                  allDiagnostic8ds={allDiagnostic8ds}
-                                 allProducts={allProducts}/>
+                                 allProducts={allProducts}
+                                 fetchDiagnostics={fetchDiagnostics}/>
             </div>
             
         </>

@@ -9,9 +9,9 @@ class Diagnostics8dQuestion(db.Model):
     question_id = db.Column(db.Integer)
 
     __table_args__ = (
-        db.PrimaryKeyConstraint(diagnostics_8d_id, question_id),
-        db.ForeignKeyConstraint([diagnostics_8d_id],[Diagnostics8d.id]),
-        db.ForeignKeyConstraint([question_id],[Question.id])
+        db.PrimaryKeyConstraint(diagnostics_8d_id, question_id, ),
+        db.ForeignKeyConstraint([diagnostics_8d_id],[Diagnostics8d.id], name='fk_diagnostics_8d_id_diagnostics_8d_id', ondelete='CASCADE'),
+        db.ForeignKeyConstraint([question_id],[Question.id], name='fk_question_id_question_id', ondelete='CASCADE')
     )
 
     

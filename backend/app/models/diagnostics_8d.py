@@ -20,7 +20,7 @@ class Diagnostics8d(db.Model):
     root_cause_id  = db.Column(db.Integer, nullable=True)
     corrective_action  = db.Column(db.Text, nullable=True)
     preventative_action  = db.Column(db.Text, nullable=True)
-    verified_fix  = db.Column(db.Text, nullable=True)
+    verified_fix  = db.Column(db.Boolean, nullable=True)
     closed = db.Column(db.Boolean, nullable = False)
     link_8d  = db.Column(db.Text, nullable=True)
     created_at  = db.Column(db.DateTime, nullable=False)

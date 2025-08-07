@@ -1,6 +1,23 @@
 
 export default function DiagnosticTable(props) {
     
+    const handleDelete = async (id) => {
+        try {
+            if (window.confirm('Are you sure you want to delete this item?')) {
+                const response = await fetch(`http://localhost:5001/admin/diagnostics8ds/${id}`, {
+                method: 'DELETE'
+                })
+                if (response.ok) {
+                    // Refresh products list after successful delete
+                    props.fetchDiagnostics() 
+                    }
+            }
+                
+            
+        } catch (error) {
+            console.error('Error deleting 8D diagnostic report:', error)
+  }
+}
     return <>
     <h1>Diagnostics 8D Table</h1>
                 <div className="scroll-box">
@@ -23,7 +40,7 @@ export default function DiagnosticTable(props) {
                                             <th>Root Cause</th>
                                             <th>Corrective Action</th>
                                             <th>Preventative Action</th>
-                                            <th>Verified Fix</th>
+                                            <th>Verified Fixed</th>
                                             <th>Closed</th>
                                             <th>Link to 8D Report</th>
                                             <th>Created At</th>
@@ -32,8 +49,12 @@ export default function DiagnosticTable(props) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {props.allDiagnostic8ds.map(diagnostic8d => (
-                                        <tr key={diagnostic8d.id}>
+                                        {props.allDiagnostic8ds.map(diagnostic8d => {
+                                            console.log(diagnostic8d)
+                                            console.log('quesiton: ', diagnostic8d.questions )
+                                            console.log(diagnostic8d.closed)
+                                            console.log(diagnostic8d.verified_fix)
+                                        return <tr key={diagnostic8d.id}>
                                             <td>{diagnostic8d.id}</td>
                                             <td>{props.allProducts.find(product => product.id === diagnostic8d.product_id)?.product}</td>
                                             <td>{diagnostic8d.from_sn}</td>  
@@ -56,14 +77,19 @@ export default function DiagnosticTable(props) {
                                             <td>{diagnostic8d.root_cause_id}</td>   
                                             <td>{diagnostic8d.corrective_action}</td>   
                                             <td>{diagnostic8d.preventative_action}</td>   
-                                            <td>{diagnostic8d.verified_fix}</td>   
-                                            <td>{diagnostic8d.closed}</td>   
+                                            <td>
+                                                {diagnostic8d.verified_fix === true ? 'Fixed' 
+                                                : diagnostic8d.verified_fix === false ? 'Not fixed' 
+                                                : 'Undetermined'}
+                                            </td>
+                                            
+                                            <td>{diagnostic8d.closed ? 'Yes' : 'No'}</td>   
                                             <td>{diagnostic8d.link_8d}</td>                          
                                             <td>{diagnostic8d.created_at}</td>
                                             <td>{diagnostic8d.updated_at}</td>
-                                            <td><button>Delete</button><button>Edit</button></td>
+                                            <td><button onClick={() => handleDelete(diagnostic8d.id)}>Delete</button><button>Edit</button></td>
                                         </tr>
-                                        ))}
+} )}
                                     </tbody>
                                 </table>
                             </div>

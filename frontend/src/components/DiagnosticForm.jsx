@@ -76,6 +76,17 @@ export default function DiagnosticForm(props) {
                 })
             })
             if (response.ok) {
+            
+            
+                const data = await response.json() 
+                const diagnostic8dId = data['id']
+                console.log('--------------+++++++')
+                console.log(diagnostic8dId)
+                submitQuestion(diagnostic8dId)
+            
+            
+
+            
             setSelectedProduct('')
             setFromSn('')
             setToSn('')
@@ -99,13 +110,34 @@ export default function DiagnosticForm(props) {
                 const errorData = await response.json();
                 console.log(errorData);
             }
-        
+
 
         } catch (error) {
             console.error('Error adding 8d:', error)
         }
+        
 
 
+    }
+
+    const submitQuestion = async (id) => {
+        try {
+            for (var i=0; i<allQuestions.length; i++) {
+            const response = await fetch(`http://localhost:5001/admin/diagnostics8ds/${id}/questions`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({question: allQuestions[i].question})
+            }) 
+            if (response.ok) {
+                setAllQuestions([])
+            }
+        }
+        } catch (error) {
+            console.error('Error adding question(s):', error)
+        }
+        
     }
     
     function addQuestion(event) {
@@ -190,7 +222,7 @@ export default function DiagnosticForm(props) {
             <label htmlFor="question">Add Questions: </label>
             <input type="text"  name="question" id="question"
                    value={question} onChange={(e) => setQuestion(e.target.value)}/>
-                    <button className="add-question-button" type='button' onClick={addQuestion}>ADD</button>
+                    {<button disabled={question === '' ? true : false} className="add-question-button" type='button' onClick={addQuestion}>ADD</button>}
             <ol>
                 {allQuestions.map(question => {
                     return <li key={question.id}>{question.question} <button onClick={() => handleDeleteQuestion(question.id)}>Delete</button></li>
