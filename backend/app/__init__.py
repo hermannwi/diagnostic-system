@@ -22,14 +22,15 @@ def create_app(config_class=Config):
 
 
     from .models.diagnostics_8d import Diagnostics8d
+    from .models.system import System
     from .models.product import Product
+    from .models.part import Part
     from .models.question import Question
     from .models.diagnostics_8d_question import Diagnostics8dQuestion
     from .models.product_question import ProductQuestion
     from .models.root_cause import RootCause
-    from .models.system import System
-    from .models.part import Part
-
+    from.models.issue import Issue
+    
     from .routes.admin_bp import admin_bp
     
     app.register_blueprint(admin_bp)

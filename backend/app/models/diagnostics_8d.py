@@ -1,12 +1,15 @@
 from .. import db
 from .root_cause import RootCause
 from .product import Product
+from.issue import Issue
 
 class Diagnostics8d(db.Model):
     __tablename__ = "diagnostics_8d"
 
     id = db.Column(db.Integer, primary_key=True)
-    product_id = db.Column(db.Integer, nullable=False)
+    system_id = db.Column(db.Integer, nullable=False)
+    product_id = db.Column(db.Integer, nullable=True)
+    part_id = db.Column(db.Integer, nullable=True)
     from_sn = db.Column(db.VARCHAR, nullable = True) 
     to_sn  = db.Column(db.VARCHAR, nullable = True)
     from_version  = db.Column(db.VARCHAR, nullable = True)
@@ -15,7 +18,7 @@ class Diagnostics8d(db.Model):
     to_supply_date  = db.Column(db.VARCHAR, nullable = True)
     from_sw  = db.Column(db.VARCHAR, nullable = True)
     to_sw  = db.Column(db.VARCHAR, nullable = True)
-    issue  = db.Column(db.Text, nullable=False)
+    issue_id  = db.Column(db.Integer, nullable=False)
     temporary_fix  = db.Column(db.Text, nullable=True)
     root_cause_id  = db.Column(db.Integer, nullable=True)
     corrective_action  = db.Column(db.Text, nullable=True)
@@ -27,11 +30,13 @@ class Diagnostics8d(db.Model):
     updated_at  = db.Column(db.DateTime, nullable=False)
     
     __table_args__ = (db.ForeignKeyConstraint([root_cause_id], [RootCause.id]),
+                      db.ForeignKeyConstraint([issue_id], [Issue.id], name='fk_diagnostics_8d_issue_id'),
                       db.ForeignKeyConstraint([product_id], [Product.id], name='fk_diagnostics_8d_product_id'))
     
     product = db.relationship('Product', backref='diagnostic8ds', lazy='select')
     root_cause = db.relationship('RootCause', backref='diagnostic8ds', lazy='select')
     questions = db.relationship('Question', backref='diagnostics_8ds', secondary='diagnostics_8d_question', lazy="select")
+    issue = db.relationship('Issue', backref='diagnostics_8ds', lazy='select')
 
     def __repr__(self):
         return f"<Diagnostic {self.id}>"

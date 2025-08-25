@@ -3,14 +3,14 @@ from datetime import datetime
 from flask import Blueprint, jsonify, request
 from sqlalchemy import exc
 from ..models.diagnostics_8d import Diagnostics8d
+from ..models.system import System
 from ..models.product import Product
+from ..models.part import Part
 from ..models.question import Question
 from ..models.root_cause import RootCause
-from ..models.system import System
-
+from ..models.issue import Issue
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
-
 
 # region Routes for the diagnostics8d table
 
@@ -19,7 +19,9 @@ def get_all_8ds():
     diagnostics_8ds = Diagnostics8d.query.all()
     return jsonify([
         {'id': d.id, 
+         'system_id': d.system_id,
          'product_id': d.product_id, 
+         'part_id': d.part_id,
          'from_sn': d.from_sn,  
          'to_sn': d.to_sn,
          'from_version': d.from_version,
@@ -55,7 +57,9 @@ def get_one_8d(id):
 
 def dict_8d(diagnostic_8d):
         return {'id': diagnostic_8d.id, 
+         'system_id': diagnostic_8d.system_id,
          'product_id': diagnostic_8d.product_id, 
+         'part_id': diagnostic_8d.part_id,
          'from_sn': diagnostic_8d.from_sn,  
          'to_sn': diagnostic_8d.to_sn,
          'from_version': diagnostic_8d.from_version,
@@ -87,22 +91,23 @@ def add_8d():
     if not data:
         return jsonify({'error': 'No data provided'}), 400
     
-    required_fields = ['product','issue', 'closed']
+    required_fields = ['system','issue', 'closed']
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Missing required fields'}), 400
     
-    product = db.session.get(Product, data['product'])
-    if not product:
-        return jsonify({'error': 'Invalid product ID'}), 400
-    product_id = product.id
+    system = db.session.get(System, data['system'])
+    if not system:
+        return jsonify({'error': 'Invalid system ID'}), 400
+    system_id = system.id
+    
+    
 
-    
-        
-    
     try:
 
         new_diagnostic8d = Diagnostics8d(
-            product_id=product_id,
+            system_id=system_id,
+            product_id=data.get('product'),
+            part_id=data.get('part'),
             from_sn=data.get('from_sn'), 
             to_sn=data.get('to_sn'),
             from_version=data.get('from_version'),
@@ -213,26 +218,6 @@ def modify_8d(id):
     
 
 
-# def connect_new_question_to_8d(id, data):
-#     diagnostic_8d = db.session.get(Diagnostics8d, id)
-#     if diagnostic_8d == None:
-#         return jsonify({'error': f'No 8d with id {id}'}), 404
-#     new_question = create_question_service(data)
-#     try:
-        
-        
-#         db.session.add(new_question)
-#         diagnostic_8d.questions.append(new_question)
-#         db.session.commit()
-#         return jsonify({
-#             'diagnostics_8d_id': id,
-#             'question_id': new_question.id
-#         }), 201
-
-#     except Exception as e:
-#         db.session.rollback()
-#         print(f"Debug - Actual error: {e}")
-#         return jsonify({'error': f'Database error occurred'}), 500 
         
 
 
@@ -278,23 +263,6 @@ def connect_question_to_8d(id):
 
 
 
-# def connect_existing_question_to_8d(id, question):
-    
-#     diagnostic_8d = db.session.get(Diagnostics8d, id)
-#     if diagnostic_8d == None:
-#         return jsonify({'error': f'No 8d with id {id}'}), 404
-#     question = db.session.get(Question, question.id)
-#     if question == None:
-#         return jsonify({'error': f'No question with id {question.id}'}), 404 
-#     try:
-#         diagnostic_8d.questions.append(question)
-#         db.session.commit()
-#         return jsonify({
-#             'diagnostics_8d_id': id,
-#             'question_id': question.id
-#         }), 201
-#     except Exception as e:
-#         return jsonify({'error': 'Database error occured'}), 500
 
 
 # endregion
@@ -305,7 +273,12 @@ def connect_question_to_8d(id):
 @admin_bp.route('/products', methods=['GET'])
 def get_all_products():
     products = Product.query.all()
-    return jsonify([{'id': p.id, 'product': p.product, "created_at": p.created_at, "updated_at": p.updated_at} for p in products]) 
+    return jsonify([{'id': p.id, 
+                     'product': p.product, 
+                     'system': p.system.system,
+                     'parts': [{'id': part.id, 'part': part.part} for part in p.parts], 
+                     "created_at": p.created_at, 
+                     "updated_at": p.updated_at} for p in products]) 
 
 @admin_bp.route('/products/<int:id>', methods=['GET'])
 def get_one_product(id):
@@ -313,7 +286,7 @@ def get_one_product(id):
     if product == None:
         return jsonify({"error": 'resource not found'}), 404
     else:
-        return jsonify({'id': product.id, 'product': product.product, "created_at": product.created_at, "updated_at": product.updated_at})
+        return jsonify({'id': product.id, 'product': product.product, 'system_id': product.system_id, "created_at": product.created_at, "updated_at": product.updated_at})
     
 
 
@@ -324,13 +297,16 @@ def add_product():
     if not data:
         return jsonify({'error': 'No data provided'}), 400
     
-    required_fields = ['product']
+    required_fields = ['product', 'system_id']
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Missing required fields'}), 400
     
+    print(data['system_id'])
+
     try:
         new_product = Product(
             product=data['product'],
+            system_id=data['system_id'],
             created_at=datetime.now(),
             updated_at=datetime.now(),
         )
@@ -350,6 +326,7 @@ def add_product():
         return jsonify({'error': 'Data integrity error'}), 400
     except Exception as e:
         db.session.rollback()
+        print(f'Debug, actual error: {e}')
         return jsonify({'error': 'Database error occurred'}), 500
     
 
@@ -644,6 +621,7 @@ def get_all_systems():
     return jsonify([
         {'id': s.id, 
          'system': s.system,
+         'products': [{'id': p.id, 'product': p.product} for p in s.products],
          'created_at': s.created_at,
          'updated_at': s.updated_at
 
@@ -732,7 +710,7 @@ def modify_system(id):
             db.session.commit()
             return jsonify({
                 'id': system_to_be_modified.id,
-                'root_cause': system_to_be_modified.system,
+                'system': system_to_be_modified.system,
                 'created_at': system_to_be_modified.created_at,
                 'updated_at': system_to_be_modified.updated_at
             })
@@ -743,6 +721,149 @@ def modify_system(id):
 
 # endregion
 
+
+# region routes for part routes
+
+@admin_bp.route('/parts', methods=['GET'])
+def get_all_parts():
+    parts = Part.query.all()
+    return jsonify([{'id': part.id, 
+                     'part': part.part, 
+                     'product': part.product.product, 
+                     'system': part.product.system.system,
+                     'created_at': part.created_at,
+                     'updated_at': part.updated_at} for part in parts])
+
+
+@admin_bp.route('/parts/<int:id>', methods=['GET'])
+def get_one_part(id):
+    part = db.session.get(Part, id)
+    return jsonify({'id': part.id, 
+                     'part': part.part, 
+                     'product': part.product.product, 
+                     'system': part.product.system.system,
+                     'created_at': part.created_at,
+                     'updated_at': part.updated_at})
+
+
+@admin_bp.route('/parts', methods=['POST'])
+def add_part():
+    data = request.json
+    print(data)
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+
+    required_fields = ['part', 'product_id']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    try:
+        new_part = Part(
+            part=data['part'],
+            product_id=data['product_id'],
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        db.session.add(new_part)
+        db.session.commit()
+        return jsonify({
+            'id': new_part.id,
+            'part': new_part.part,
+            'product': new_part.product.product,
+            'created_at': new_part.created_at,
+            'updated_at': new_part.updated_at
+        }), 201
+    except exc.IntegrityError as e:
+        db.session.rollback()
+        if 'UNIQUE constraint failed' in str(e):
+            return jsonify({'error': 'Part already exists'}), 409
+        return jsonify({'error': 'Data integrity error'}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Database error occurred'}), 500
+
+
+@admin_bp.route('/parts/<int:id>', methods=['PUT'])
+def modify_part(id):
+    data = request.json
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+
+    required_fields = ['part']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+    try:
+        part_to_be_modified = db.session.get(Part, id)
+        if part_to_be_modified == None:
+            return jsonify({'error': 'data not found'}), 404
+        else:
+            part_to_be_modified.part = data['part']
+            part_to_be_modified.updated_at = datetime.now()
+
+            db.session.commit()
+            return jsonify({
+                'id': part_to_be_modified.id,
+                'part': part_to_be_modified.part,
+                'created_at': part_to_be_modified.created_at,
+                'updated_at': part_to_be_modified.updated_at
+            })
+    except Exception as e:
+        db.session.rollback()
+        print(f"Debug - Actual error: {e}")
+        return jsonify({'error': f'Database error occurred'}), 500 
+    
+
+# region routes for issues
+
+admin_bp.route('/issues', methods=['GET'])
+def get_all_issues():
+    issues = Issue.query.all()
+    return jsonify([
+        {'id': i.id, 
+        'issue': i.issue,
+        'created_at': i.created_at,
+        'updated_at': i.updated_at
+
+        } for i in issues])
+
+admin_bp.route('/issues', methods=['POST'])
+def add_issue():
+    data = request.json
+    print(data)
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+
+    required_fields = ['issue']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+    
+    try:
+        new_issue = Issue(
+            issue=data['issue'],
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        db.session.add(new_issue)
+        db.session.commit()
+        return jsonify({
+            'id': new_issue.id,
+            'issue': new_issue.issue,
+            'created_at': new_issue.created_at,
+            'updated_at': new_issue.updated_at
+        }), 201
+    except exc.IntegrityError as e:
+        db.session.rollback()
+        if 'UNIQUE constraint failed' in str(e):
+            return jsonify({'error': 'Issue already exists'}), 409
+        return jsonify({'error': 'Data integrity error'}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Database error occurred'}), 500
+
+# endregion
+    
+
+# endregion
 def create_question_service(question_data):
         new_question = Question(
             question=question_data['question'],
