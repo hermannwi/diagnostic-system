@@ -43,3 +43,29 @@ def get_issues(system_id):
     
     except Exception as e:    
         return jsonify({"error": e}), 500
+    
+
+
+# @diagn_bp.route('/diagnostics/<str:issue>', methods=['GET'])
+# def get_questions(issue):
+#     if not issue:
+#         return jsonify({'error': 'No data provided'}), 400
+    
+
+@diagn_bp.route('/root-causes/<int:issue_id>')
+def get_root_causes(issue_id):
+    try:
+        diagnostics = Diagnostics8d.query.filter(Diagnostics8d.issue_id == issue_id).all()
+        
+        # Convert SQLAlchemy objects to dictionaries
+        root_causes = []
+        for diagnostic in diagnostics:
+            if diagnostic.root_cause:  # Check for null root_cause
+                root_causes.append({
+                    'id': diagnostic.root_cause.id,
+                    'root_cause': diagnostic.root_cause.root_cause
+                })
+        
+        return jsonify(root_causes)  # Return flat array, not nested
+    except Exception as e:    
+        return jsonify({"error": str(e)}), 500  # Convert exception to string

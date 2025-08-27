@@ -30,7 +30,7 @@ def get_all_8ds():
          'to_supply_date': d.to_supply_date,
          'from_sw': d.from_sw,
          'to_sw': d.to_sw,
-         'issue': d.issue,
+         'issue_id': d.issue_id,
          'questions': [{'id': q.id, 'question': q.question} for q in d.questions],
          'temporary_fix': d.temporary_fix,
          'root_cause_id': d.root_cause_id,
@@ -68,7 +68,7 @@ def dict_8d(diagnostic_8d):
          'to_supply_date': diagnostic_8d.to_supply_date,
          'from_sw': diagnostic_8d.from_sw,
          'to_sw': diagnostic_8d.to_sw,
-         'issue': diagnostic_8d.issue,
+         'issue_id': diagnostic_8d.issue_id,
          'questions': [{'id': q.id, 'question': q.question} for q in diagnostic_8d.questions],
          'temporary_fix': diagnostic_8d.temporary_fix,
          'root_cause_id': diagnostic_8d.root_cause_id,
@@ -91,7 +91,7 @@ def add_8d():
     if not data:
         return jsonify({'error': 'No data provided'}), 400
     
-    required_fields = ['system','issue', 'closed']
+    required_fields = ['system','issue_id', 'closed']
     if not all(field in data for field in required_fields):
         return jsonify({'error': 'Missing required fields'}), 400
     
@@ -116,7 +116,7 @@ def add_8d():
             to_supply_date=data.get('to_supply_date'),
             from_sw=data.get('from_sw'),
             to_sw=data.get('to_sw'),
-            issue=data['issue'],
+            issue_id=data['issue_id'],
             temporary_fix=data.get('temporary_fix'),
             root_cause_id=data.get('root_cause_id'),
             corrective_action=data.get('corrective_action'),
@@ -537,7 +537,6 @@ def add_root_cause():
     
     try:
         existing_root_cause = RootCause.query.filter_by(root_cause=data['root_cause']).first()
-        print(existing_root_cause)
         if existing_root_cause:
             return jsonify({
                 'id': existing_root_cause.id,
@@ -812,10 +811,11 @@ def modify_part(id):
         print(f"Debug - Actual error: {e}")
         return jsonify({'error': f'Database error occurred'}), 500 
     
+# endregion
 
 # region routes for issues
 
-admin_bp.route('/issues', methods=['GET'])
+@admin_bp.route('/issues', methods=['GET'])
 def get_all_issues():
     issues = Issue.query.all()
     return jsonify([
@@ -826,7 +826,7 @@ def get_all_issues():
 
         } for i in issues])
 
-admin_bp.route('/issues', methods=['POST'])
+@admin_bp.route('/issues', methods=['POST'])
 def add_issue():
     data = request.json
     print(data)
@@ -838,19 +838,28 @@ def add_issue():
         return jsonify({'error': 'Missing required fields'}), 400
     
     try:
-        new_issue = Issue(
-            issue=data['issue'],
-            created_at=datetime.now(),
-            updated_at=datetime.now()
-        )
-        db.session.add(new_issue)
-        db.session.commit()
-        return jsonify({
-            'id': new_issue.id,
-            'issue': new_issue.issue,
-            'created_at': new_issue.created_at,
-            'updated_at': new_issue.updated_at
-        }), 201
+        existing_issue = Issue.query.filter_by(issue=data['issue']).first()
+        if existing_issue:
+            return jsonify({
+                'id': existing_issue.id,
+                'issue': existing_issue.issue,
+                'created_at': existing_issue.created_at,
+                'updated_at': existing_issue.updated_at
+            }), 201
+        else:
+            new_issue = Issue(
+                issue=data['issue'],
+                created_at=datetime.now(),
+                updated_at=datetime.now()
+            )
+            db.session.add(new_issue)
+            db.session.commit()
+            return jsonify({
+                'id': new_issue.id,
+                'issue': new_issue.issue,
+                'created_at': new_issue.created_at,
+                'updated_at': new_issue.updated_at
+            }), 201
     except exc.IntegrityError as e:
         db.session.rollback()
         if 'UNIQUE constraint failed' in str(e):
@@ -858,7 +867,9 @@ def add_issue():
         return jsonify({'error': 'Data integrity error'}), 400
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': 'Database error occurred'}), 500
+        import traceback; traceback.print_exc()
+        return jsonify({'error': type(e).__name__, 'detail': str(e)}), 500
+        
 
 # endregion
     

@@ -18,6 +18,8 @@ export default function AdminSection() {
     const [allSystems, setAllSystems] = useState([])
     const [allParts, setAllParts] = useState([])
     const [allQuestions, setAllQuestions] = useState([])
+    const [allIssues, setAllIssues] = useState([])
+    const [allRootCauses, setAllRootCauses] = useState([])
 
     const fetchDiagnostics = async () => {
         try {
@@ -30,6 +32,24 @@ export default function AdminSection() {
         }
         }
 
+    const fetchRootCauses = async () => {
+        try {
+            const response = await fetch('http://localhost:5001/admin/root-causes')
+            const data = await response.json()
+            setAllRootCauses(data)
+        } catch (error) {
+            console.error('Error fetching root causes:', error)
+    }}
+
+    const fetchIssues = async () => {
+        try {
+            const response = await fetch('http://localhost:5001/admin/issues')
+            
+            const data = await response.json()
+            setAllIssues(data)
+        } catch (error) {
+            console.error('Error fetching issues:', error)
+    }}
 
     const fetchSystems = async () => {
         try {
@@ -75,6 +95,13 @@ export default function AdminSection() {
         }
     }
 
+    useEffect(() => {
+        fetchRootCauses()
+    }, [])
+
+    useEffect(() => {
+        fetchIssues()
+    }, [])
 
     useEffect(() => {
         fetchDiagnostics()
@@ -153,9 +180,12 @@ export default function AdminSection() {
                                  allSystems={allSystems}
                                  allProducts={allProducts}
                                  allParts={allParts}
+                                 allIssues={allIssues}
+                                 allRootCauses={allRootCauses}
                                  fetchDiagnostics={fetchDiagnostics}
                                  fetchProducts={fetchProducts}
                                  fetchParts={fetchParts}
+
                                  />
             </div>
             

@@ -29,11 +29,13 @@ def create_app(config_class=Config):
     from .models.diagnostics_8d_question import Diagnostics8dQuestion
     from .models.product_question import ProductQuestion
     from .models.root_cause import RootCause
-    from.models.issue import Issue
+    from .models.issue import Issue
     
     from .routes.admin_bp import admin_bp
+    from .routes.diagn_bp import diagn_bp
     
     app.register_blueprint(admin_bp)
+    app.register_blueprint(diagn_bp)
 
     
     return app

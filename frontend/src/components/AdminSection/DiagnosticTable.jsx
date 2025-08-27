@@ -66,7 +66,7 @@ export default function DiagnosticTable(props) {
                                             <td>{diagnostic8d.to_supply_date}</td>  
                                             <td>{diagnostic8d.from_sw}</td> 
                                             <td>{diagnostic8d.to_sw}</td>     
-                                            <td>{diagnostic8d.issue}</td>
+                                            <td>{props.allIssues.find(issue => issue.id === diagnostic8d.issue_id)?.issue}</td>
                                             <td>
                                                 <ul>
                                                     {diagnostic8d.questions && diagnostic8d.questions.map(question => {
@@ -75,7 +75,9 @@ export default function DiagnosticTable(props) {
                                                 </ul>
                                             </td>
                                             <td>{diagnostic8d.temporary_fix}</td>
-                                            <td>{diagnostic8d.root_cause_id}</td>   
+                                            <td>{props.allRootCauses.find(rootCause => rootCause.id === diagnostic8d.root_cause_id)?.root_cause}</td>
+                                             
+                            
                                             <td>{diagnostic8d.corrective_action}</td>   
                                             <td>{diagnostic8d.preventative_action}</td>   
                                             <td>

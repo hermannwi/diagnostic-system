@@ -59,7 +59,7 @@ export default function DiagnosticForm(props) {
     function showProducts() {
         const systemObject = props.allSystems.find(system => system.id.toString() === selectedSystem)
         return systemObject?.products.map(product => {
-                        console.log(product)
+                        
                         return (<option key={product.id} value={product.id}>
                             {product.product}
                         </option>)
@@ -91,9 +91,25 @@ export default function DiagnosticForm(props) {
             var rootCauseId = null
             if (rootCauseResponse.ok) {
                 const rootCauseData =  await rootCauseResponse.json() 
-                console.log(rootCauseData)
                 rootCauseId = rootCauseData.id
             }
+
+            
+            const issueResponse = await fetch('http://localhost:5001/admin/issues', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({issue: issue})
+            })
+            console.log(issueResponse)
+            var issueId = null
+            if (issueResponse.ok) {
+                const  issueData = await issueResponse.json()
+                issueId = issueData.id
+
+            }
+            
             
             const response = await fetch('http://localhost:5001/admin/diagnostics8ds', {
                 method: 'POST',
@@ -112,7 +128,7 @@ export default function DiagnosticForm(props) {
                     to_supply_date: toSupplyDate,
                     from_sw: fromSw,
                     to_sw: toSw,
-                    issue: issue,
+                    issue_id: issueId,
                     temporary_fix: temporaryFix,
                     root_cause_id: rootCauseId,
                     corrective_action: correctiveAction,
@@ -122,6 +138,7 @@ export default function DiagnosticForm(props) {
                     link_8d: link8d
                 })
             })
+            console.log(response)
             if (response.ok) {
             
             
@@ -156,7 +173,7 @@ export default function DiagnosticForm(props) {
         }
             else {
                 const errorData = await response.json();
-                console.log(errorData);
+                
             }
 
 
