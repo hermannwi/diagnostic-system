@@ -1,7 +1,9 @@
 from .. import db
 from .root_cause import RootCause
+from .system import System
 from .product import Product
-from.issue import Issue
+from .part import Part
+from .issue import Issue
 
 class Diagnostics8d(db.Model):
     __tablename__ = "diagnostics_8d"
@@ -31,7 +33,9 @@ class Diagnostics8d(db.Model):
     
     __table_args__ = (db.ForeignKeyConstraint([root_cause_id], [RootCause.id]),
                       db.ForeignKeyConstraint([issue_id], [Issue.id], name='fk_diagnostics_8d_issue_id'),
-                      db.ForeignKeyConstraint([product_id], [Product.id], name='fk_diagnostics_8d_product_id'))
+                      db.ForeignKeyConstraint([product_id], [Product.id], name='fk_diagnostics_8d_product_id'),
+                      db.ForeignKeyConstraint([system_id], [System.id], name='fk_diagnostics_8d_system_id'),
+                      db.ForeignKeyConstraint([part_id], [Part.id], name='fk_diagnostics_8d_part_id'))
     
     product = db.relationship('Product', backref='diagnostic8ds', lazy='select')
     root_cause = db.relationship('RootCause', backref='diagnostic8ds', lazy='select')

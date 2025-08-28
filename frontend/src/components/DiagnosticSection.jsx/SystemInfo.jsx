@@ -3,9 +3,13 @@ import { useEffect, useState } from "react"
 export default function SystemInfo(props) {
     const [selectedSystem, setSelectedSystem] = useState('')
     const [selectedIssue, setSelectedIssue] = useState('')
+    const [issues, setIssues] = useState([])
     const [selectedRootCause, setSelectedRootCause] = useState('')
     const [questions, setQuestions] = useState([])
     const [rootCauses, setRootCauses] = useState([])
+
+   
+    console.log('selected_issues',selectedIssue)
     
     const fetchRootCauses = async () => {
 
@@ -18,7 +22,24 @@ export default function SystemInfo(props) {
         }
     }
 
-    
+    const fetchIssues = async () => {
+        
+        try {
+            const response = await fetch(`http://localhost:5001/diagn/issues/${Number(selectedSystem)}`)
+            const data = await response.json()
+            setIssues(data)
+        } catch (error) {
+            console.error('Error fetching issues:', error)
+        }
+    }
+
+    useEffect(() => {
+    if (selectedSystem) {
+        fetchIssues()
+    } else {
+        setIssues([])  // Clear issues if no system selected
+    }
+}, [selectedSystem])
 
     
     return (
@@ -39,16 +60,12 @@ export default function SystemInfo(props) {
                     </select>
 
             <label htmlFor="issue">Issue: </label>
-            <select name="issue" id="issue"
+            
+                    <select name="issue" id="issue"
                     value={selectedIssue}
                     onChange={(event) => setSelectedIssue(event.target.value)}>
                     <option value=''>Select an issue...</option>
-                    {props.allDiagnostic8ds.filter(diagns => diagns.system_id === Number(selectedSystem))
-                    .map(diagns => {
-                        return (<option key={diagns.id} value={diagns.id}>
-                            {diagns.issue_id}
-                        </option>)
-                    })}
+                    {issues.map(issue => {return <option key={Math.floor(Math.random() * 10)}>{issue.issue}</option>})}
                     </select>
             <button onClick={(event) => {
                 event.preventDefault()

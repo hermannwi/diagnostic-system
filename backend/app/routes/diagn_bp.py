@@ -31,25 +31,27 @@ def get_all_systems():
 
 
 
-@diagn_bp.route('/diagnostics/<int:parent_id>', methods=['GET'])
+@diagn_bp.route('/issues/<int:system_id>', methods=['GET'])
 def get_issues(system_id):
     """Get direct children for any node"""
+    print('system id: ', system_id)
     try:
         diagnostics = Diagnostics8d.query.filter(Diagnostics8d.system_id == system_id).all()
         issues = [diagnostic.issue for diagnostic in diagnostics]
-        return jsonify([
-            {'issues': issues}
-        ])
+        print('\n---------------', issues, '----------------\n')
+        return jsonify(
+            [{
+                'issue': issue.issue
+            } for issue in issues]
+        )
     
     except Exception as e:    
+        print(e)
         return jsonify({"error": e}), 500
     
 
 
-# @diagn_bp.route('/diagnostics/<str:issue>', methods=['GET'])
-# def get_questions(issue):
-#     if not issue:
-#         return jsonify({'error': 'No data provided'}), 400
+
     
 
 @diagn_bp.route('/root-causes/<int:issue_id>')

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import useProducts from '../../hooks/useProducts';
 
 export default function ProductForm(props) {
     const [selectedSystem, setSelectedSystem] = useState('')
@@ -6,12 +7,19 @@ export default function ProductForm(props) {
     const [editProductName, setEditProductName] = useState('')
     const [editingID, setEditingID] = useState(null)
 
+    const {products, fetchProducts, addProduct} = useProducts()
+
+
+    useEffect(() => {
+        fetchProducts()
+    }, [])
     
     const handleSubmit = async (event) => {
         
     event.preventDefault()
     
     try {
+        addProduct(event)
         const response = await fetch('http://localhost:5001/admin/products', {
             method: 'POST',
             headers: {
@@ -125,7 +133,7 @@ export default function ProductForm(props) {
                     </tr>
                 </thead>
                 <tbody>
-                    {props.allProducts.map(product => {
+                    {products.map(product => {
                     
                     return <tr key={product.id}>
                         <td>{product.id}</td>
