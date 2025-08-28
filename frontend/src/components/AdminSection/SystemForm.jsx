@@ -1,53 +1,36 @@
 import {useState} from 'react'
+import useSystems from '../../hooks/useSystems'
 
 export default function SystemForm(props) {
         const [systemName, setSystemName] = useState('')
         const [editSystemName, setEditSystemName] = useState('')
         const [editingID, setEditingID] = useState(null)
+
+
+        const {systems, fetchSystems, addSystem, updateSystem} = useSystems()
         
     
     
         const handleSubmit = async (event) => {
             event.preventDefault()
             
+
+
             try {
-                const response = await fetch('http://localhost:5001/admin/systems', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({system: systemName})  
-                })
+                const systemData = {system: systemName}
+                const response = await addSystem(systemData)
+
                 
-                if (response.ok) {
+                if (response.success) {
+                    console.log(response.success)
                     setSystemName('')  
-                    console.log('success')
-                    props.fetchSystems()
-                    
                 }
             } catch (error) {
                 console.error('Error adding system:', error)
             }
         }
     
-    //     const handleDelete = async (systemId) => {
-    //         try {
-    //             if (window.confirm('Are you sure you want to delete this item?')) {
-    //                 const response = await fetch(`http://localhost:5001/admin/systems/${systemId}`, {
-    //                 method: 'DELETE'
-    //                 })
-    //                 if (response.ok) {
-    //                     // Refresh products list after successful delete
-    //                     props.fetchSystems() // or whatever your refresh function is called
-    //                     }
-    //             }
-                    
-                
-                
-    //         } catch (error) {
-    //             console.error('Error deleting system:', error)
-    //   }
-    // }
+   
     
         function handleEdit(system) {
                 setEditingID(system.id)
@@ -56,25 +39,19 @@ export default function SystemForm(props) {
     
         const handleSave = async (system) => {
             try {
-                const response = await fetch(`http://localhost:5001/admin/systems/${system.id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({system: editSystemName})  // Use state, not FormData
-                })
+                const systemData = {system_id: system.id, system: editSystemName}
+                const response = await updateSystem(systemData)
                 
-                if (response.ok) {
+                
+                if (response.success) {
                     setSystemName('')  
                     setEditingID(null)
-                    props.fetchSystems()
-                    props.fetchProducts()
-                    props.fetchParts()
-                    console.log('success')
+                    
+                    
                     
                 }
             } catch (error) {
-                console.error('Error adding system:', error)
+                console.error('Error updating system:', error)
             }
         }
         
@@ -110,7 +87,7 @@ export default function SystemForm(props) {
                         </tr>
                     </thead>
                     <tbody>
-                        {props.allSystems.map(system => (
+                        {systems.map(system => (
                         <tr key={system.id}>
                             <td>{system.id}</td>
                             <td>{editingID === system.id ? <input 
